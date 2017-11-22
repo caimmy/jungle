@@ -2,19 +2,22 @@ package jungle
 
 import (
 	"net/http"
-	"io"
 	"log"
 )
 
-func indexPage(w http.ResponseWriter, r http.Request) {
-	io.WriteString(w, "hello jungle!")
+func indexPage(w http.ResponseWriter, r *http.Request) {
+	http.Error(w, "asdfasdfads", 404)
 }
 
-func run() {
 
-	http.HandleFunc("/", indexPage)
-	err := http.ListenAndServe("8080", nil)
-	if (err != nil) {
-		log.Fatal("ListenAndServ: ", err.Error())
+func Run() {
+
+	MainServer := &http.Server{}
+	MainServer.Handler = &JungleController{}
+	MainServer.Addr = ":8080"
+	err := MainServer.ListenAndServe()
+	if (err == nil) {
+		log.Fatal("MainServer ListenAndServe : ", err.Error())
 	}
+
 }
