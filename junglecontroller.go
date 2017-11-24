@@ -19,16 +19,15 @@ package jungle
 
 import (
 	"net/http"
-	"io"
 )
 
 type ControllerInterface interface {
 	Init()
 	Prepare()
-	Get()
-	Post()
-	Put()
-	Delete()
+	Get(http.ResponseWriter, *http.Request)
+	Post(http.ResponseWriter, *http.Request)
+	Put(http.ResponseWriter, *http.Request)
+	Delete(http.ResponseWriter, *http.Request)
 }
 
 type JungleController struct {
@@ -38,6 +37,26 @@ type JungleController struct {
 
 }
 
-func (c *JungleController) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	io.WriteString(w, "拉斯科搭街坊拉克丝搭街坊立刻23123居离开")
+func (c *JungleController) Init() {
+	panic("need impleted!")
+}
+
+func (c *JungleController) Prepare() {
+	panic("need impleted!")
+}
+
+func (c *JungleController) Get(w http.ResponseWriter, r *http.Request) {
+	panic("need impleted!")
+}
+
+func (c *JungleController) Post(w http.ResponseWriter, r *http.Request) {
+	panic("need impleted!")
+}
+
+func (c *JungleController) Put(w http.ResponseWriter, r *http.Request) {
+	panic("need impleted!")
+}
+
+func (c *JungleController) Delete(w http.ResponseWriter, r *http.Request) {
+	panic("need impleted!")
 }
