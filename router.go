@@ -18,8 +18,8 @@
 package jungle
 
 import (
-	"net/http"
 	"io"
+	"net/http"
 )
 
 type JungleHttpServerHandler struct {
@@ -30,15 +30,21 @@ func (hander *JungleHttpServerHandler)ServeHTTP(w http.ResponseWriter, r *http.R
 	if (len(hander.routers) == 0) {
 		io.WriteString(w, "Welcome to Jungle, make up your first JungleController please!")
 	} else {
-		controller, ok := hander.routers[r.RequestURI]
+		controller, ok 			:= hander.routers[r.RequestURI]
+		jungleResponseWriter 	:= JungleResponseWriter{w}
+		jungleRequest 			:= &JungleRequest{*r}
+
 		if ok {
 			switch r.Method {
 			case "GET":
-				controller.Get(w, r)
+				controller.Get(jungleResponseWriter, jungleRequest)
 			default:
-				io.WriteString(w, "Hello, Jungle!")
+				io.WriteString(jungleResponseWriter, "Hello, Jungle!")
 			}
+		} else {
+			NotFound(jungleResponseWriter, jungleRequest)
 		}
+
 	}
 }
 

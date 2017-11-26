@@ -19,7 +19,6 @@ package main
 
 import (
 	"github.com/caimmy/jungle"
-	"net/http"
 	"io"
 )
 
@@ -27,7 +26,7 @@ type CaimmyController struct {
 	jungle.JungleController
 }
 
-func (c *CaimmyController)Get(w http.ResponseWriter, r *http.Request) {
+func (c *CaimmyController)Get(w jungle.JungleResponseWriter, r *jungle.JungleRequest) {
 	io.WriteString(w, "sadfsdfsdfasdfsdfa caimmy controller")
 }
 

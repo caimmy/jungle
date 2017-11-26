@@ -18,16 +18,15 @@
 package jungle
 
 import (
-	"net/http"
 )
 
 type ControllerInterface interface {
 	Init()
 	Prepare()
-	Get(http.ResponseWriter, *http.Request)
-	Post(http.ResponseWriter, *http.Request)
-	Put(http.ResponseWriter, *http.Request)
-	Delete(http.ResponseWriter, *http.Request)
+	Get(JungleResponseWriter, *JungleRequest)
+	Post(JungleResponseWriter, *JungleRequest)
+	Put(JungleResponseWriter, *JungleRequest)
+	Delete(JungleResponseWriter, *JungleRequest)
 }
 
 type JungleController struct {
@@ -45,18 +44,18 @@ func (c *JungleController) Prepare() {
 	panic("need impleted!")
 }
 
-func (c *JungleController) Get(w http.ResponseWriter, r *http.Request) {
+func (c *JungleController) Get(w JungleResponseWriter, r *JungleRequest) {
 	panic("need impleted!")
 }
 
-func (c *JungleController) Post(w http.ResponseWriter, r *http.Request) {
+func (c *JungleController) Post(w JungleResponseWriter, r *JungleRequest) {
 	panic("need impleted!")
 }
 
-func (c *JungleController) Put(w http.ResponseWriter, r *http.Request) {
+func (c *JungleController) Put(w JungleResponseWriter, r *JungleRequest) {
 	panic("need impleted!")
 }
 
-func (c *JungleController) Delete(w http.ResponseWriter, r *http.Request) {
+func (c *JungleController) Delete(w JungleResponseWriter, r *JungleRequest) {
 	panic("need impleted!")
 }
