@@ -1,4 +1,4 @@
-// Copyright 2014 jungle Author. All Rights Reserved.
+// Copyright 2017 jungle Author. All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -27,8 +27,15 @@ type CaimmyController struct {
 }
 
 func (c *CaimmyController)Get(w jungle.JungleResponseWriter, r *jungle.JungleRequest) {
+	jungle.Redirect(w, r, "http://www.baidu.com", 301)
 	io.WriteString(w, "sadfsdfsdfasdfsdfa caimmy controller")
 }
+
+/*
+func (c *CaimmyController)Post(w jungle.JungleResponseWriter, r *jungle.JungleRequest) {
+	io.WriteString(w, "abcdefg by POST")
+}
+*/
 
 func main() {
 	jungle.Router("/", &CaimmyController{})

@@ -1,4 +1,4 @@
-// Copyright 2014 jungle Author. All Rights Reserved.
+// Copyright 2017 jungle Author. All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -17,8 +17,7 @@
 
 package jungle
 
-import (
-)
+import "net/http"
 
 type ControllerInterface interface {
 	Init()
@@ -45,17 +44,17 @@ func (c *JungleController) Prepare() {
 }
 
 func (c *JungleController) Get(w JungleResponseWriter, r *JungleRequest) {
-	panic("need impleted!")
+	http.Error(w, "Method not Allowed", 405)
 }
 
 func (c *JungleController) Post(w JungleResponseWriter, r *JungleRequest) {
-	panic("need impleted!")
+	http.Error(w, "Method not Allowed", 405)
 }
 
 func (c *JungleController) Put(w JungleResponseWriter, r *JungleRequest) {
-	panic("need impleted!")
+	http.Error(w, "Method not Allowed", 405)
 }
 
 func (c *JungleController) Delete(w JungleResponseWriter, r *JungleRequest) {
-	panic("need impleted!")
+	http.Error(w, "Method not Allowed", 405)
 }

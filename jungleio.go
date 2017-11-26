@@ -1,4 +1,4 @@
-// Copyright 2014 jungle Author. All Rights Reserved.
+// Copyright 2017 jungle Author. All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,15 +12,24 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// date     : 2017/11/26 8:56
+// date     : 2017/11/26 10:19
 // author   : caimmy@hotmail.com
 
 package jungle
 
 import (
 	"net/http"
-	"fmt"
 )
+
+
+const (
+	METHOD_GET 		= "GET"
+	METHOD_POST		= "POST"
+	METHOD_PUT		= "PUT"
+	METHOD_DELETE	= "DELETE"
+)
+
+
 
 type JungleResponseWriter struct {
 	http.ResponseWriter
@@ -30,18 +39,10 @@ type JungleRequest struct {
 	http.Request
 }
 
-
-// Error replies to the request with the specified error message and HTTP code.
-// It does not otherwise end the request; the caller should ensure no further
-// writes are done to w.
-// The error message should be plain text.
-func Error(w JungleResponseWriter, error string, code int) {
-	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
-	w.Header().Set("X-Content-Type-Options", "nosniff")
-	w.WriteHeader(code)
-	fmt.Fprintln(w, error)
+func NotFound(w JungleResponseWriter, r *JungleRequest) {
+	http.NotFound(w, &r.Request)
 }
 
-func NotFound(w JungleResponseWriter, r *JungleRequest) {
-	Error(w, "page not found.", 404)
+func Redirect(w JungleResponseWriter, r *JungleRequest, url string, code int) {
+	http.Redirect(w, &r.Request, url, code)
 }

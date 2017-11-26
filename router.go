@@ -1,4 +1,4 @@
-// Copyright 2014 jungle Author. All Rights Reserved.
+// Copyright 2017 jungle Author. All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ package jungle
 import (
 	"io"
 	"net/http"
+	"log"
 )
 
 type JungleHttpServerHandler struct {
@@ -27,6 +28,12 @@ type JungleHttpServerHandler struct {
 }
 
 func (hander *JungleHttpServerHandler)ServeHTTP(w http.ResponseWriter, r *http.Request)  {
+	defer func() {
+		r := recover()
+		if r != nil {
+			log.Printf("runtime error %v", r)
+		}
+	}()
 	if (len(hander.routers) == 0) {
 		io.WriteString(w, "Welcome to Jungle, make up your first JungleController please!")
 	} else {
@@ -36,8 +43,14 @@ func (hander *JungleHttpServerHandler)ServeHTTP(w http.ResponseWriter, r *http.R
 
 		if ok {
 			switch r.Method {
-			case "GET":
+			case METHOD_GET:
 				controller.Get(jungleResponseWriter, jungleRequest)
+			case METHOD_POST:
+				controller.Post(jungleResponseWriter, jungleRequest)
+			case METHOD_PUT:
+				controller.Put(jungleResponseWriter, jungleRequest)
+			case METHOD_DELETE:
+				controller.Delete(jungleResponseWriter, jungleRequest)
 			default:
 				io.WriteString(jungleResponseWriter, "Hello, Jungle!")
 			}
