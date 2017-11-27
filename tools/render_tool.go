@@ -12,30 +12,22 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// date     : 2017/11/24 14:18
+// date     : 2017/11/27 22:48
 // author   : caimmy@hotmail.com
 
-package main
+package tools
 
 import (
-	"github.com/caimmy/jungle"
+	"html/template"
+	"bytes"
 )
 
-type CaimmyController struct {
-	jungle.JungleController
-}
-
-func (c *CaimmyController)Get(w jungle.JungleResponseWriter, r *jungle.JungleRequest) {
-	c.RenderHtml(w, "./test.phtml", nil)
-}
-
-/*
-func (c *CaimmyController)Post(w jungle.JungleResponseWriter, r *jungle.JungleRequest) {
-	io.WriteString(w, "abcdefg by POST")
-}
-*/
-
-func main() {
-	jungle.Router("/", &CaimmyController{})
-	jungle.Run()
+func RenderHtml(tpl_path string, tpl_vars map[string] interface{}) string {
+	t, err := template.ParseFiles(tpl_path)
+	if err != nil {
+		panic("template file not found!")
+	}
+	w := bytes.NewBufferString("")
+	t.Execute(w, tpl_vars)
+	return w.String()
 }

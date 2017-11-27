@@ -17,7 +17,11 @@
 
 package jungle
 
-import "net/http"
+import (
+	"net/http"
+	"github.com/caimmy/jungle/tools"
+	"io"
+)
 
 type ControllerInterface interface {
 	Init()
@@ -44,17 +48,22 @@ func (c *JungleController) Prepare() {
 }
 
 func (c *JungleController) Get(w JungleResponseWriter, r *JungleRequest) {
-	http.Error(w, "Method not Allowed", 405)
+	http.Error(w, "Method not Allowed", http.StatusMethodNotAllowed)
 }
 
 func (c *JungleController) Post(w JungleResponseWriter, r *JungleRequest) {
-	http.Error(w, "Method not Allowed", 405)
+	http.Error(w, "Method not Allowed", http.StatusMethodNotAllowed)
 }
 
 func (c *JungleController) Put(w JungleResponseWriter, r *JungleRequest) {
-	http.Error(w, "Method not Allowed", 405)
+	http.Error(w, "Method not Allowed", http.StatusMethodNotAllowed)
 }
 
 func (c *JungleController) Delete(w JungleResponseWriter, r *JungleRequest) {
-	http.Error(w, "Method not Allowed", 405)
+	http.Error(w, "Method not Allowed", http.StatusMethodNotAllowed)
+}
+
+func (c * JungleController) RenderHtml(w JungleResponseWriter, tpl_path string, tpl_params map[string] interface{}) {
+	tpl_string := tools.RenderHtml(tpl_path, tpl_params)
+	io.WriteString(w, tpl_string)
 }
