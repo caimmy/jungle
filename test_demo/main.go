@@ -26,7 +26,10 @@ type CaimmyController struct {
 }
 
 func (c *CaimmyController)Get(w jungle.JungleResponseWriter, r *jungle.JungleRequest) {
-	c.RenderHtml(w, "./test.phtml", nil)
+	param := make(map[string] interface{})
+	param["name"] = "caimmy"
+	param["days"] = 10
+	c.RenderHtml(w, "test_demo/test.phtml", param)
 }
 
 /*

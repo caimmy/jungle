@@ -20,14 +20,17 @@ package tools
 import (
 	"html/template"
 	"bytes"
+	"log"
 )
 
 func RenderHtml(tpl_path string, tpl_vars map[string] interface{}) string {
 	t, err := template.ParseFiles(tpl_path)
+	log.Println(t.Name())
 	if err != nil {
 		panic("template file not found!")
 	}
 	w := bytes.NewBufferString("")
 	t.Execute(w, tpl_vars)
+	log.Println(w.String())
 	return w.String()
 }

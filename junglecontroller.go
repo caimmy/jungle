@@ -20,7 +20,7 @@ package jungle
 import (
 	"net/http"
 	"github.com/caimmy/jungle/tools"
-	"io"
+	"html/template"
 )
 
 type ControllerInterface interface {
@@ -36,11 +36,11 @@ type JungleController struct {
 	// Templates setting
 	TplName		 	string
 	Layout 			string
-
+	cache_layout 	template.Template
 }
 
 func (c *JungleController) Init() {
-	panic("need impleted!")
+	c.Layout = "templates/layout.phtml"
 }
 
 func (c *JungleController) Prepare() {
@@ -65,5 +65,18 @@ func (c *JungleController) Delete(w JungleResponseWriter, r *JungleRequest) {
 
 func (c * JungleController) RenderHtml(w JungleResponseWriter, tpl_path string, tpl_params map[string] interface{}) {
 	tpl_string := tools.RenderHtml(tpl_path, tpl_params)
-	io.WriteString(w, tpl_string)
+	c.SetLayout("test_demo/templates/layout.phtml")
+	c.cache_layout.Execute(w, template.HTML(tpl_string))
+}
+
+func (c *JungleController) SetLayout(layout string) {
+	c.Layout = layout
+	if (c.Layout != "") {
+		_t_layout, err := template.ParseFiles(c.Layout)
+		if err != nil {
+			panic("layout template not found")
+		} else {
+			c.cache_layout = *_t_layout
+		}
+	}
 }
