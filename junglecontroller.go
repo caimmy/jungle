@@ -24,49 +24,52 @@ import (
 )
 
 type ControllerInterface interface {
-	Init()
+	Init(JungleResponseWriter, *JungleRequest)
 	Prepare()
-	Get(JungleResponseWriter, *JungleRequest)
-	Post(JungleResponseWriter, *JungleRequest)
-	Put(JungleResponseWriter, *JungleRequest)
-	Delete(JungleResponseWriter, *JungleRequest)
+	Get()
+	Post()
+	Put()
+	Delete()
 }
 
 type JungleController struct {
+	ResponseWriter 	JungleResponseWriter
+	Request 		*JungleRequest
 	// Templates setting
 	TplName		 	string
 	Layout 			string
 	cache_layout 	template.Template
 }
 
-func (c *JungleController) Init() {
-	c.Layout = "templates/layout.phtml"
+func (c *JungleController) Init(w JungleResponseWriter, r *JungleRequest) {
+	c.ResponseWriter 	= w
+	c.Request			= r
 }
 
 func (c *JungleController) Prepare() {
 	panic("need impleted!")
 }
 
-func (c *JungleController) Get(w JungleResponseWriter, r *JungleRequest) {
-	http.Error(w, "Method not Allowed", http.StatusMethodNotAllowed)
+func (c *JungleController) Get() {
+	http.Error(c.ResponseWriter, "Method not Allowed", http.StatusMethodNotAllowed)
 }
 
-func (c *JungleController) Post(w JungleResponseWriter, r *JungleRequest) {
-	http.Error(w, "Method not Allowed", http.StatusMethodNotAllowed)
+func (c *JungleController) Post() {
+	http.Error(c.ResponseWriter, "Method not Allowed", http.StatusMethodNotAllowed)
 }
 
-func (c *JungleController) Put(w JungleResponseWriter, r *JungleRequest) {
-	http.Error(w, "Method not Allowed", http.StatusMethodNotAllowed)
+func (c *JungleController) Put() {
+	http.Error(c.ResponseWriter, "Method not Allowed", http.StatusMethodNotAllowed)
 }
 
-func (c *JungleController) Delete(w JungleResponseWriter, r *JungleRequest) {
-	http.Error(w, "Method not Allowed", http.StatusMethodNotAllowed)
+func (c *JungleController) Delete() {
+	http.Error(c.ResponseWriter, "Method not Allowed", http.StatusMethodNotAllowed)
 }
 
-func (c * JungleController) RenderHtml(w JungleResponseWriter, tpl_path string, tpl_params map[string] interface{}) {
+func (c * JungleController) RenderHtml(tpl_path string, tpl_params map[string] interface{}) {
 	tpl_string := tools.RenderHtml(tpl_path, tpl_params)
 	c.SetLayout("test_demo/templates/layout.phtml")
-	c.cache_layout.Execute(w, template.HTML(tpl_string))
+	c.cache_layout.Execute(c.ResponseWriter, template.HTML(tpl_string))
 }
 
 func (c *JungleController) SetLayout(layout string) {

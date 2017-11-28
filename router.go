@@ -38,24 +38,26 @@ func (hander *JungleHttpServerHandler)ServeHTTP(w http.ResponseWriter, r *http.R
 		io.WriteString(w, "Welcome to Jungle, make up your first JungleController please!")
 	} else {
 		controller, ok 			:= hander.routers[r.RequestURI]
-		jungleResponseWriter 	:= JungleResponseWriter{w}
-		jungleRequest 			:= &JungleRequest{*r}
 
 		if ok {
+			jungleResponseWriter 	:= JungleResponseWriter{w}
+			jungleRequest 			:= &JungleRequest{*r}
+			controller.Init(jungleResponseWriter, jungleRequest)
+
 			switch r.Method {
 			case METHOD_GET:
-				controller.Get(jungleResponseWriter, jungleRequest)
+				controller.Get()
 			case METHOD_POST:
-				controller.Post(jungleResponseWriter, jungleRequest)
+				controller.Post()
 			case METHOD_PUT:
-				controller.Put(jungleResponseWriter, jungleRequest)
+				controller.Put()
 			case METHOD_DELETE:
-				controller.Delete(jungleResponseWriter, jungleRequest)
+				controller.Delete()
 			default:
 				io.WriteString(jungleResponseWriter, "Hello, Jungle!")
 			}
 		} else {
-			NotFound(jungleResponseWriter, jungleRequest)
+			http.NotFound(w, r)
 		}
 
 	}
