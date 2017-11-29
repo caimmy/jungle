@@ -22,10 +22,11 @@ import (
 	"net/http"
 	"log"
 	"reflect"
+	"fmt"
 )
 
 type JungleHttpServerHandler struct {
-	routers			map[string] ControllerInterface
+	routers			map[string] reflect.Type
 }
 
 func (hander *JungleHttpServerHandler)ServeHTTP(w http.ResponseWriter, r *http.Request)  {
@@ -33,28 +34,35 @@ func (hander *JungleHttpServerHandler)ServeHTTP(w http.ResponseWriter, r *http.R
 		r := recover()
 		if r != nil {
 			log.Printf("runtime error %v", r)
+			fmt.Fprintf(w, "runtime error %v", r)
 		}
 	}()
 	if (len(hander.routers) == 0) {
 		io.WriteString(w, "Welcome to Jungle, make up your first JungleController please!")
 	} else {
-		controller_type, ok 			:= hander.routers[r.RequestURI]
+		predef_controller, ok 			:= hander.routers[r.RequestURI]
 
 		if ok {
 			jungleResponseWriter 	:= JungleResponseWriter{w}
 			jungleRequest 			:= &JungleRequest{*r}
-			controller := reflect.New(reflect.TypeOf(controller_type)).Interface().(JungleController)
-			controller.Init(jungleResponseWriter, jungleRequest)
+			controller := reflect.New(predef_controller)
+
+			params := make([]reflect.Value, 2)
+			params[0] = reflect.ValueOf(jungleResponseWriter)
+			params[1] = reflect.ValueOf(jungleRequest)
+			controller.MethodByName("Init").Call(params)
+
+			//controller.Init(jungleResponseWriter, jungleRequest)
 
 			switch r.Method {
 			case METHOD_GET:
-				controller.Get()
+				controller.MethodByName("Get").Call(make([]reflect.Value, 0))
 			case METHOD_POST:
-				controller.Post()
+				//controller.Post()
 			case METHOD_PUT:
-				controller.Put()
+				//controller.Put()
 			case METHOD_DELETE:
-				controller.Delete()
+				//controller.Delete()
 			default:
 				io.WriteString(jungleResponseWriter, "Hello, Jungle!")
 			}
@@ -66,5 +74,5 @@ func (hander *JungleHttpServerHandler)ServeHTTP(w http.ResponseWriter, r *http.R
 }
 
 func (hander *JungleHttpServerHandler)Add(pattern string, c ControllerInterface)  {
-	hander.routers[pattern] = c
+	hander.routers[pattern] = reflect.TypeOf(c)
 }

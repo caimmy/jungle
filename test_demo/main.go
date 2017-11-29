@@ -41,4 +41,13 @@ func (c *CaimmyController)Post(w jungle.JungleResponseWriter, r *jungle.JungleRe
 func main() {
 	jungle.Router("/", &CaimmyController{})
 	jungle.Run()
+	/*
+	m := reflect.TypeOf(CaimmyController{})
+	p := reflect.New(m)
+	f := p.MethodByName("Prepare")
+	fmt.Printf("a : %v\n", f)
+	params := make([]reflect.Value, 0)
+	f.Call(params)
+	fmt.Println("asdfasdf")
+	*/
 }

@@ -21,6 +21,7 @@ import (
 	"net/http"
 	"github.com/caimmy/jungle/tools"
 	"html/template"
+	"fmt"
 )
 
 type ControllerInterface interface {
@@ -47,7 +48,7 @@ func (c *JungleController) Init(w JungleResponseWriter, r *JungleRequest) {
 }
 
 func (c *JungleController) Prepare() {
-	panic("need impleted!")
+	fmt.Println("Prepared function called!")
 }
 
 func (c *JungleController) Get() {
