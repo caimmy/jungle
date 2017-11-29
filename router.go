@@ -21,6 +21,7 @@ import (
 	"io"
 	"net/http"
 	"log"
+	"reflect"
 )
 
 type JungleHttpServerHandler struct {
@@ -37,11 +38,12 @@ func (hander *JungleHttpServerHandler)ServeHTTP(w http.ResponseWriter, r *http.R
 	if (len(hander.routers) == 0) {
 		io.WriteString(w, "Welcome to Jungle, make up your first JungleController please!")
 	} else {
-		controller, ok 			:= hander.routers[r.RequestURI]
+		controller_type, ok 			:= hander.routers[r.RequestURI]
 
 		if ok {
 			jungleResponseWriter 	:= JungleResponseWriter{w}
 			jungleRequest 			:= &JungleRequest{*r}
+			controller := reflect.New(reflect.TypeOf(controller_type)).Interface().(JungleController)
 			controller.Init(jungleResponseWriter, jungleRequest)
 
 			switch r.Method {
