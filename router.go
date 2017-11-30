@@ -45,18 +45,13 @@ func (hander *JungleHttpServerHandler)ServeHTTP(w http.ResponseWriter, r *http.R
 		if ok {
 			jungleResponseWriter 	:= JungleResponseWriter{w}
 			jungleRequest 			:= &JungleRequest{*r}
-			controller := reflect.New(predef_controller)
+			controller := reflect.New(predef_controller).Interface().(ControllerInterface)
 
-			params := make([]reflect.Value, 2)
-			params[0] = reflect.ValueOf(jungleResponseWriter)
-			params[1] = reflect.ValueOf(jungleRequest)
-			controller.MethodByName("Init").Call(params)
-
-			//controller.Init(jungleResponseWriter, jungleRequest)
+			controller.Init(jungleResponseWriter, jungleRequest)
 
 			switch r.Method {
 			case METHOD_GET:
-				controller.MethodByName("Get").Call(make([]reflect.Value, 0))
+				controller.Get()
 			case METHOD_POST:
 				//controller.Post()
 			case METHOD_PUT:
@@ -74,5 +69,8 @@ func (hander *JungleHttpServerHandler)ServeHTTP(w http.ResponseWriter, r *http.R
 }
 
 func (hander *JungleHttpServerHandler)Add(pattern string, c ControllerInterface)  {
-	hander.routers[pattern] = reflect.TypeOf(c)
+	reflectVal := reflect.ValueOf(c)
+	t := reflect.Indirect(reflectVal).Type()
+
+	hander.routers[pattern] = t
 }
