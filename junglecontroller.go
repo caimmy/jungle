@@ -19,14 +19,19 @@ package jungle
 
 import (
 	"net/http"
-	"github.com/caimmy/jungle/tools"
 	"html/template"
 	"fmt"
+	"github.com/caimmy/jungle/context"
+	"strings"
+	"github.com/caimmy/jungle/tools"
+	"io"
 )
 
 type ControllerInterface interface {
-	Init(JungleResponseWriter, *JungleRequest)
+	Init(cptr *ControllerInterface, w http.ResponseWriter, r *http.Request)
 	Prepare()
+	Action()
+
 	Get()
 	Post()
 	Put()
@@ -34,17 +39,25 @@ type ControllerInterface interface {
 }
 
 type JungleController struct {
-	ResponseWriter 	JungleResponseWriter
-	Request 		*JungleRequest
+	Ctx 			context.Context
+
 	// Templates setting
 	TplName		 	string
 	Layout 			string
 	cache_layout 	template.Template
+
+	// Runtime Instances
+	instance_prt	*ControllerInterface
 }
 
-func (c *JungleController) Init(w JungleResponseWriter, r *JungleRequest) {
-	c.ResponseWriter 	= w
-	c.Request			= r
+// intialize controller instance.
+// cptr params ControllerInterface : receive a instance to pointer the final Implements of JungleController
+func (c *JungleController) Init(cptr *ControllerInterface, w http.ResponseWriter, r *http.Request) {
+	c.Ctx.ResponseWriter	= w
+	c.Ctx.Request 			= r
+
+	c.instance_prt  					= cptr
+	(*c.instance_prt).Prepare()
 }
 
 func (c *JungleController) Prepare() {
@@ -52,25 +65,50 @@ func (c *JungleController) Prepare() {
 }
 
 func (c *JungleController) Get() {
-	http.Error(c.ResponseWriter, "Method not Allowed", http.StatusMethodNotAllowed)
+	c.ResponseError("Method not Allowed", http.StatusMethodNotAllowed)
 }
 
 func (c *JungleController) Post() {
-	http.Error(c.ResponseWriter, "Method not Allowed", http.StatusMethodNotAllowed)
+	c.ResponseError("Method not Allowed", http.StatusMethodNotAllowed)
 }
 
 func (c *JungleController) Put() {
-	http.Error(c.ResponseWriter, "Method not Allowed", http.StatusMethodNotAllowed)
+	c.ResponseError("Method not Allowed", http.StatusMethodNotAllowed)
 }
 
 func (c *JungleController) Delete() {
-	http.Error(c.ResponseWriter, "Method not Allowed", http.StatusMethodNotAllowed)
+	c.ResponseError("Method not Allowed", http.StatusMethodNotAllowed)
+}
+
+func (c* JungleController) Action() {
+	switch strings.ToUpper(c.Ctx.Request.Method) {
+	case METHOD_GET:
+		(*c.instance_prt).Get()
+	case METHOD_POST:
+		(*c.instance_prt).Get()
+	case METHOD_PUT:
+		(*c.instance_prt).Put()
+	case METHOD_DELETE:
+		(*c.instance_prt).Delete()
+	default:
+		c.ResponseError("Method not Allowed", http.StatusMethodNotAllowed)
+	}
+}
+
+// Response standard Error information to client
+func (c *JungleController) ResponseError(err_msg string, err_code int) {
+	http.Error(c.Ctx.ResponseWriter, err_msg, err_code)
 }
 
 func (c * JungleController) RenderHtml(tpl_path string, tpl_params map[string] interface{}) {
 	tpl_string := tools.RenderHtml(tpl_path, tpl_params)
-	c.SetLayout("test_demo/templates/layout.phtml")
-	c.cache_layout.Execute(c.ResponseWriter, template.HTML(tpl_string))
+	c.SetLayout("templates/layout.phtml")
+
+	c.cache_layout.Execute(c.Ctx.ResponseWriter, template.HTML(tpl_string))
+}
+
+func (c *JungleController) Echo(content string) {
+	io.WriteString(c.Ctx.ResponseWriter, content)
 }
 
 func (c *JungleController) SetLayout(layout string) {

@@ -19,6 +19,7 @@ package main
 
 import (
 	"github.com/caimmy/jungle"
+	"fmt"
 )
 
 type CaimmyController struct {
@@ -29,7 +30,12 @@ func (c *CaimmyController)Get() {
 	param := make(map[string] interface{})
 	param["name"] = "caimmy"
 	param["days"] = 10
-	c.RenderHtml("test_demo/test.phtml", param)
+	c.RenderHtml("templates/test.phtml", param)
+}
+
+func (c *CaimmyController)Prepare() {
+	c.JungleController.Prepare()
+	fmt.Println("caimmycontroller's prepare function called")
 }
 
 /*

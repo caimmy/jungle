@@ -1,4 +1,4 @@
-// Copyright 2017 jungle Author. All Rights Reserved.
+// Copyright 2014 jungle Author. All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,28 +12,27 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// date     : 2017/11/27 22:48
+// date     : 2017/12/1 15:40
 // author   : caimmy@hotmail.com
 
 package tools
 
 import (
-	"html/template"
-	"bytes"
-	"log"
-	"fmt"
+	"os/exec"
+	"os"
+	"strings"
+	"path/filepath"
 )
 
-func RenderHtml(tpl_path string, tpl_vars map[string] interface{}) string {
-	t, err := template.ParseFiles(tpl_path)
+func GetJungleRootPath() string {
+	rel_path, err := exec.LookPath(os.Args[0])
 	if err != nil {
-		str := bytes.NewBufferString("")
-		fmt.Fprintf(str, "template file not found! -> %v", err)
-		panic(str)
+		panic(err)
 	}
-	log.Println(t.Name())
-	w := bytes.NewBufferString("")
-	t.Execute(w, tpl_vars)
-	log.Println(w.String())
-	return w.String()
+	abs_path, err := filepath.Abs(rel_path)
+	if err != nil {
+		panic(err)
+	}
+	iPos := strings.LastIndex(abs_path, string(os.PathSeparator))
+	return string(abs_path[0 : iPos+1])
 }

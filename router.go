@@ -43,24 +43,9 @@ func (hander *JungleHttpServerHandler)ServeHTTP(w http.ResponseWriter, r *http.R
 		predef_controller, ok 			:= hander.routers[r.RequestURI]
 
 		if ok {
-			jungleResponseWriter 	:= JungleResponseWriter{w}
-			jungleRequest 			:= &JungleRequest{*r}
 			controller := reflect.New(predef_controller).Interface().(ControllerInterface)
-
-			controller.Init(jungleResponseWriter, jungleRequest)
-
-			switch r.Method {
-			case METHOD_GET:
-				controller.Get()
-			case METHOD_POST:
-				//controller.Post()
-			case METHOD_PUT:
-				//controller.Put()
-			case METHOD_DELETE:
-				//controller.Delete()
-			default:
-				io.WriteString(jungleResponseWriter, "Hello, Jungle!")
-			}
+			controller.Init(&controller, w, r)
+			controller.Action()
 		} else {
 			http.NotFound(w, r)
 		}

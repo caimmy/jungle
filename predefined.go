@@ -1,4 +1,4 @@
-// Copyright 2017 jungle Author. All Rights Reserved.
+// Copyright 2014 jungle Author. All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,28 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// date     : 2017/11/27 22:48
+// date     : 2017/12/1 16:10
 // author   : caimmy@hotmail.com
 
-package tools
+package jungle
 
-import (
-	"html/template"
-	"bytes"
-	"log"
-	"fmt"
-)
-
-func RenderHtml(tpl_path string, tpl_vars map[string] interface{}) string {
-	t, err := template.ParseFiles(tpl_path)
-	if err != nil {
-		str := bytes.NewBufferString("")
-		fmt.Fprintf(str, "template file not found! -> %v", err)
-		panic(str)
-	}
-	log.Println(t.Name())
-	w := bytes.NewBufferString("")
-	t.Execute(w, tpl_vars)
-	log.Println(w.String())
-	return w.String()
-}
+const TEMPLATES_LAYOUT_DEFAULT  = "templates/layout.phtml"
