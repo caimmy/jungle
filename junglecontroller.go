@@ -25,6 +25,8 @@ import (
 	"strings"
 	"github.com/caimmy/jungle/tools"
 	"io"
+	"os"
+	"bytes"
 )
 
 type ControllerInterface interface {
@@ -42,7 +44,7 @@ type JungleController struct {
 	Ctx 			context.Context
 
 	// Templates setting
-	TplName		 	string
+	TplPath		 	string
 	Layout 			string
 	cache_layout 	template.Template
 
@@ -85,7 +87,7 @@ func (c* JungleController) Action() {
 	case METHOD_GET:
 		(*c.instance_prt).Get()
 	case METHOD_POST:
-		(*c.instance_prt).Get()
+		(*c.instance_prt).Post()
 	case METHOD_PUT:
 		(*c.instance_prt).Put()
 	case METHOD_DELETE:
@@ -100,11 +102,16 @@ func (c *JungleController) ResponseError(err_msg string, err_code int) {
 	http.Error(c.Ctx.ResponseWriter, err_msg, err_code)
 }
 
-func (c * JungleController) RenderHtml(tpl_path string, tpl_params map[string] interface{}) {
-	tpl_string := tools.RenderHtml(tpl_path, tpl_params)
+func (c *JungleController) Render(tplfile string, tpl_params map[string] interface{}) {
+	content_str := bytes.NewBufferString("")
+	tools.RenderHtml(content_str, TemplatesPath + string(os.PathSeparator) + tplfile, tpl_params)
 	c.SetLayout("templates/layout.phtml")
 
-	c.cache_layout.Execute(c.Ctx.ResponseWriter, template.HTML(tpl_string))
+	c.cache_layout.Execute(c.Ctx.ResponseWriter, template.HTML(content_str.String()))
+}
+
+func (c *JungleController) RenderPartial(tplfile string, tpl_params map[string] interface{})  {
+	tools.RenderHtml(c.Ctx.ResponseWriter, TemplatesPath + string(os.PathSeparator) + tplfile, tpl_params)
 }
 
 func (c *JungleController) Echo(content string) {

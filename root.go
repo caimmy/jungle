@@ -15,13 +15,14 @@ func NewJungleHttpServerHandler() JungleHttpServerHandler {
 	return JungleHttpServerHandler{routers: make(map[string] reflect.Type)}
 }
 
-type root_app struct {
-	Server 		*http.Server
+type JungleRootApplication struct {
+	Server 			*http.Server
+	TemplatePath	string
 }
 
 var End_run chan bool
 
-func (app *root_app) Run() {
+func (app *JungleRootApplication) Run() {
 	main_http_server := http.Server{}
 	main_http_server.Addr = ":8081"
 	main_http_server.Handler = &Global_JungleHttpServerHandler

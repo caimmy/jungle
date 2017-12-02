@@ -20,20 +20,16 @@ package tools
 import (
 	"html/template"
 	"bytes"
-	"log"
 	"fmt"
+	"io"
 )
 
-func RenderHtml(tpl_path string, tpl_vars map[string] interface{}) string {
+func RenderHtml(w io.Writer, tpl_path string, tpl_vars map[string] interface{}) {
 	t, err := template.ParseFiles(tpl_path)
 	if err != nil {
 		str := bytes.NewBufferString("")
 		fmt.Fprintf(str, "template file not found! -> %v", err)
 		panic(str)
 	}
-	log.Println(t.Name())
-	w := bytes.NewBufferString("")
 	t.Execute(w, tpl_vars)
-	log.Println(w.String())
-	return w.String()
 }

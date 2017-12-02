@@ -30,7 +30,14 @@ func (c *CaimmyController)Get() {
 	param := make(map[string] interface{})
 	param["name"] = "caimmy"
 	param["days"] = 10
-	c.RenderHtml("templates/test.phtml", param)
+	c.Render("test.phtml", param)
+}
+
+func (c *CaimmyController)Post()  {
+	param := make(map[string] interface{})
+	param["name"] = "alsdfj撒旦浪费就"
+	param["days"] = 90
+	c.RenderPartial("test.phtml", param)
 }
 
 func (c *CaimmyController)Prepare() {
@@ -45,7 +52,9 @@ func (c *CaimmyController)Post(w jungle.JungleResponseWriter, r *jungle.JungleRe
 */
 
 func main() {
-	jungle.Router("/", &CaimmyController{})
+	caimmyController := CaimmyController{}
+	jungle.Router("/", &caimmyController)
+	jungle.TemplatesPath = "templates"
 	jungle.Run()
 	/*
 	m := reflect.TypeOf(CaimmyController{})

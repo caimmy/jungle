@@ -1,12 +1,21 @@
 package jungle
 
+var (
+	JungleApp 			*JungleRootApplication
+	TemplatesPath		string
+)
 
+func init() {
+	JungleApp = NewJungleApp()
+}
 
 func Run() {
+	JungleApp.Run()
+}
 
-	new_root_app := root_app{}
-	new_root_app.Run()
-
+func NewJungleApp() *JungleRootApplication {
+	app := &JungleRootApplication{}
+	return app
 }
 
 // raw add router information for http server
