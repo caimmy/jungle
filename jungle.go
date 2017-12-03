@@ -1,5 +1,7 @@
 package jungle
 
+import "github.com/caimmy/jungle/html"
+
 var (
 	JungleApp 			*JungleRootApplication
 	TemplatesPath		string
@@ -14,7 +16,7 @@ func Run() {
 }
 
 func NewJungleApp() *JungleRootApplication {
-	app := &JungleRootApplication{}
+	app := &JungleRootApplication{TemplateManager: html.NewTemplatesManager()}
 	return app
 }
 

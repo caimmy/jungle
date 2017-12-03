@@ -21,12 +21,12 @@ import (
 	"net/http"
 	"html/template"
 	"fmt"
-	"github.com/caimmy/jungle/context"
 	"strings"
-	"github.com/caimmy/jungle/tools"
 	"io"
 	"os"
 	"bytes"
+	"github.com/caimmy/jungle/tools"
+	"github.com/caimmy/jungle/context"
 )
 
 type ControllerInterface interface {
@@ -103,14 +103,15 @@ func (c *JungleController) ResponseError(err_msg string, err_code int) {
 }
 
 func (c *JungleController) Render(tplfile string, tpl_params map[string] interface{}) {
+	// cached and prehot template in TplManager
 	content_str := bytes.NewBufferString("")
 	tools.RenderHtml(content_str, TemplatesPath + string(os.PathSeparator) + tplfile, tpl_params)
-	c.SetLayout("templates/layout.phtml")
-
-	c.cache_layout.Execute(c.Ctx.ResponseWriter, template.HTML(content_str.String()))
+	layout_template := JungleApp.TemplateManager.LoadLayout(TemplatesPath + string(os.PathSeparator) + "/layout/layout.phtml")
+	layout_template.Execute(c.Ctx.ResponseWriter, template.HTML(content_str.String()))
 }
 
 func (c *JungleController) RenderPartial(tplfile string, tpl_params map[string] interface{})  {
+	// cached and prehot template in TplManager
 	tools.RenderHtml(c.Ctx.ResponseWriter, TemplatesPath + string(os.PathSeparator) + tplfile, tpl_params)
 }
 

@@ -20,9 +20,7 @@ package jungle
 import (
 	"io"
 	"net/http"
-	"log"
 	"reflect"
-	"fmt"
 )
 
 type JungleHttpServerHandler struct {
@@ -30,6 +28,7 @@ type JungleHttpServerHandler struct {
 }
 
 func (hander *JungleHttpServerHandler)ServeHTTP(w http.ResponseWriter, r *http.Request)  {
+	/*
 	defer func() {
 		r := recover()
 		if r != nil {
@@ -37,6 +36,7 @@ func (hander *JungleHttpServerHandler)ServeHTTP(w http.ResponseWriter, r *http.R
 			fmt.Fprintf(w, "runtime error %v", r)
 		}
 	}()
+	*/
 	if (len(hander.routers) == 0) {
 		io.WriteString(w, "Welcome to Jungle, make up your first JungleController please!")
 	} else {
