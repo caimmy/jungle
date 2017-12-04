@@ -21,10 +21,14 @@ import (
 	"log"
 	"fmt"
 	"os"
+	"time"
 )
 
 func NewLoggingManager (logPath string) *LoggingManager {
-	logging_instance := &LoggingManager{LoggingPath: logPath + "/t.log"}
+	logging_instance := &LoggingManager{
+		LoggingPath: logPath + "/t.log",
+		LoggingCached: make([]interface{}, 0, 1000),
+	}
 	logging_instance.StartRecord()
 	return logging_instance
 }
@@ -33,9 +37,10 @@ type LoggingManager struct {
 	LoggingPath 			string
 	LoggingSize				int
 	LoggingTailLabel		string
+	LoggingCached 			[]interface{}
 
 	logger_file_prt 		*os.File
-
+	dump_log_ticker			*time.Ticker
 	log.Logger
 }
 
@@ -46,14 +51,33 @@ func (this *LoggingManager) StartRecord() {
 		panic(err)
 	}
 	this.Logger = *log.New(this.logger_file_prt, "", log.Ldate | log.Ltime | log.Llongfile)
+	go this.SchedualLogit()
 }
 
 // Close the filelog handler
 func (this *LoggingManager) StopRecord() {
+	this.dump_log_ticker.Stop()
+	this.Dumplogs()
+
 	this.logger_file_prt.Close()
 }
 
-func (this *LoggingManager) Writeline(txt string) {
-	this.Output(2, fmt.Sprintf(txt))
+func (this *LoggingManager) Writeline(v interface{}) {
+	this.LoggingCached = append(this.LoggingCached, v)
+}
+
+func (this *LoggingManager) Dumplogs() {
+	for _, val := range this.LoggingCached {
+		this.Output(2, fmt.Sprintf("%v", val))
+	}
+	this.LoggingCached = append([]interface{}{})
 	this.logger_file_prt.Sync()
+}
+
+func (this *LoggingManager) SchedualLogit() {
+	this.dump_log_ticker = time.NewTicker(time.Second * 5)
+
+	for _ = range this.dump_log_ticker.C{
+		this.Dumplogs()
+	}
 }
