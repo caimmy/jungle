@@ -25,7 +25,6 @@ import (
 	"io"
 	"os"
 	"bytes"
-	"github.com/caimmy/jungle/tools"
 	"github.com/caimmy/jungle/context"
 )
 
@@ -58,7 +57,7 @@ func (c *JungleController) Init(cptr *ControllerInterface, w http.ResponseWriter
 	c.Ctx.ResponseWriter	= w
 	c.Ctx.Request 			= r
 
-	c.instance_prt  					= cptr
+	c.instance_prt  		= cptr
 	(*c.instance_prt).Prepare()
 }
 
@@ -105,14 +104,14 @@ func (c *JungleController) ResponseError(err_msg string, err_code int) {
 func (c *JungleController) Render(tplfile string, tpl_params map[string] interface{}) {
 	// cached and prehot template in TplManager
 	content_str := bytes.NewBufferString("")
-	tools.RenderHtml(content_str, TemplatesPath + string(os.PathSeparator) + tplfile, tpl_params)
+	JungleApp.TemplateManager.RenderHtml(content_str, TemplatesPath + string(os.PathSeparator) + tplfile, tpl_params)
 	layout_template := JungleApp.TemplateManager.LoadLayout(TemplatesPath + string(os.PathSeparator) + "/layout/layout.phtml")
 	layout_template.Execute(c.Ctx.ResponseWriter, template.HTML(content_str.String()))
 }
 
 func (c *JungleController) RenderPartial(tplfile string, tpl_params map[string] interface{})  {
 	// cached and prehot template in TplManager
-	tools.RenderHtml(c.Ctx.ResponseWriter, TemplatesPath + string(os.PathSeparator) + tplfile, tpl_params)
+	JungleApp.TemplateManager.RenderHtml(c.Ctx.ResponseWriter, TemplatesPath + string(os.PathSeparator) + tplfile, tpl_params)
 }
 
 func (c *JungleController) Echo(content string) {

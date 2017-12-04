@@ -1,13 +1,19 @@
 package jungle
 
-import "github.com/caimmy/jungle/html"
+import (
+	"github.com/caimmy/jungle/html"
+	"github.com/caimmy/jungle/plugins/logger"
+)
 
 var (
 	JungleApp 			*JungleRootApplication
 	TemplatesPath		string
+	LogPath				string
 )
 
 func init() {
+	TemplatesPath 		= "templates"
+	LogPath				= "logs"
 	JungleApp = NewJungleApp()
 }
 
@@ -16,7 +22,10 @@ func Run() {
 }
 
 func NewJungleApp() *JungleRootApplication {
-	app := &JungleRootApplication{TemplateManager: html.NewTemplatesManager()}
+	app := &JungleRootApplication{
+		TemplateManager: html.NewTemplatesManager(),
+		LoggerManager: logger.NewLoggingManager(LogPath),
+	}
 	return app
 }
 

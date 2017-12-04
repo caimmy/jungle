@@ -20,7 +20,17 @@ package html
 import (
 	"html/template"
 	"fmt"
+	"io"
 )
+
+func NewTemplatesManager() *TemplatesManager {
+	tplManager := &TemplatesManager{
+		list_Layout_Templates: make(map[string] *template.Template),
+		list_Page_Templates: make(map[string] *template.Template),
+	}
+	tplManager.None_Layout = template.Must(template.New("none_layout").Parse("{{ . }}"))
+	return tplManager
+}
 
 type TemplatesManager struct {
 	list_Layout_Templates 			map[string] *template.Template
@@ -46,11 +56,9 @@ func (t *TemplatesManager) LoadLayout(tpl_path string) *template.Template {
 	}
 }
 
-func NewTemplatesManager() *TemplatesManager {
-	tplManager := &TemplatesManager{
-		list_Layout_Templates: make(map[string] *template.Template),
-		list_Page_Templates: make(map[string] *template.Template),
-	}
-	tplManager.None_Layout = template.Must(template.New("none_layout").Parse("{{ . }}"))
-	return tplManager
+func (t *TemplatesManager) RenderHtml(w io.Writer, tpl_path string, tpl_vars map[string] interface{}) {
+	t.LoadLayout(tpl_path).Execute(w, tpl_vars)
 }
+
+
+
