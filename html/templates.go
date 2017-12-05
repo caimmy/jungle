@@ -19,7 +19,6 @@ package html
 
 import (
 	"html/template"
-	"fmt"
 	"io"
 )
 
@@ -42,13 +41,11 @@ type TemplatesManager struct {
 func (t *TemplatesManager) LoadLayout(tpl_path string) *template.Template {
 	cached_tpl, ok := t.list_Layout_Templates[tpl_path]
 	if ok {
-		fmt.Println("load tpl from cache")
 		return cached_tpl
 	} else {
 		tpl_parsed, err := template.ParseFiles(tpl_path)
 		if err == nil {
 			t.list_Layout_Templates[tpl_path] = tpl_parsed
-			fmt.Println("load tpl from file")
 			return tpl_parsed
 		} else {
 			return t.None_Layout

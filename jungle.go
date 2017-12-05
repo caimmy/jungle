@@ -5,6 +5,7 @@ import (
 	"github.com/caimmy/jungle/plugins/logger"
 )
 
+// Config params for Top Application
 var (
 	JungleApp 			*JungleRootApplication
 	TemplatesPath		string

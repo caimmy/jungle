@@ -22,11 +22,12 @@ import (
 	"fmt"
 	"os"
 	"time"
+	"sync"
 )
 
 func NewLoggingManager (logPath string) *LoggingManager {
 	logging_instance := &LoggingManager{
-		LoggingPath: logPath + "/t.log",
+		LoggingPath: logPath,
 		LoggingCached: make([]interface{}, 0, 1000),
 	}
 	logging_instance.StartRecord()
@@ -40,17 +41,16 @@ type LoggingManager struct {
 	LoggingCached 			[]interface{}
 
 	logger_file_prt 		*os.File
+	logger_file_day 		time.Time
 	dump_log_ticker			*time.Ticker
+
+	rotateMutex				sync.Mutex
+
 	log.Logger
 }
 
 func (this *LoggingManager) StartRecord() {
-	var err error
-	this.logger_file_prt, err = os.OpenFile(this.LoggingPath, os.O_RDWR | os.O_CREATE, 0666)
-	if err != nil {
-		panic(err)
-	}
-	this.Logger = *log.New(this.logger_file_prt, "", log.Ldate | log.Ltime | log.Llongfile)
+	this.CreateLogger()
 	go this.SchedualLogit()
 }
 
@@ -67,11 +67,37 @@ func (this *LoggingManager) Writeline(v interface{}) {
 }
 
 func (this *LoggingManager) Dumplogs() {
-	for _, val := range this.LoggingCached {
-		this.Output(2, fmt.Sprintf("%v", val))
+	if len(this.LoggingCached) > 0 {
+		this.Rotation()
+		for _, val := range this.LoggingCached {
+			this.Output(3, fmt.Sprintf("%v", val))
+		}
+		this.LoggingCached = append([]interface{}{})
+		this.logger_file_prt.Sync()
 	}
-	this.LoggingCached = append([]interface{}{})
-	this.logger_file_prt.Sync()
+}
+
+func (this *LoggingManager) CreateLogger() {
+	fmt.Println("create logger")
+	this.logger_file_day = time.Now()
+	var err error
+	this.logger_file_prt, err = os.OpenFile(this.LoggingPath + "/" + this.logger_file_day.Format("2006_01_02") + ".log",
+		os.O_RDWR | os.O_CREATE, 0666)
+	if err != nil {
+		panic(err)
+	}
+	this.Logger = *log.New(this.logger_file_prt, "", log.Ldate | log.Ltime | log.Llongfile)
+}
+
+func (this *LoggingManager) Rotation() {
+	cur_time := time.Now()
+	this.rotateMutex.Lock()
+	defer this.rotateMutex.Unlock()
+	if cur_time.Day() != this.logger_file_day.Day() {
+		// rotation log and rename prev logfile
+		this.logger_file_prt.Close()
+		this.CreateLogger()
+	}
 }
 
 func (this *LoggingManager) SchedualLogit() {
@@ -81,3 +107,4 @@ func (this *LoggingManager) SchedualLogit() {
 		this.Dumplogs()
 	}
 }
+
