@@ -62,7 +62,6 @@ func (c *JungleController) Init(cptr *ControllerInterface, w http.ResponseWriter
 }
 
 func (c *JungleController) Prepare() {
-	fmt.Println("Prepared function called!")
 }
 
 func (c *JungleController) Get() {

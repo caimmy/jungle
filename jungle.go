@@ -10,6 +10,9 @@ var (
 	JungleApp 			*JungleRootApplication
 	TemplatesPath		string
 	LogPath				string
+
+	RedisServer			string
+	RedisDb				int
 )
 
 func init() {
