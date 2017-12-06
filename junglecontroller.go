@@ -20,7 +20,6 @@ package jungle
 import (
 	"net/http"
 	"html/template"
-	"fmt"
 	"strings"
 	"io"
 	"os"
@@ -61,7 +60,17 @@ func (c *JungleController) Init(cptr *ControllerInterface, w http.ResponseWriter
 	(*c.instance_prt).Prepare()
 }
 
+func (c *JungleController) SetSession(key string, value interface{}) {
+	JungleApp.SessionManager.Set(c.Ctx, key, value)
+}
+
+func (c *JungleController) GetSession(key string) interface{} {
+	return JungleApp.SessionManager.Get(c.Ctx, key)
+}
+
 func (c *JungleController) Prepare() {
+	// 开启全局会话管理器
+	JungleApp.SessionManager.OpenSession(c.Ctx)
 }
 
 func (c *JungleController) Get() {

@@ -19,10 +19,12 @@ package session
 
 import (
 	"github.com/caimmy/jungle/context"
-	"time"
 	"net/http"
 	"os"
-	"fmt"
+	"encoding/json"
+	"io/ioutil"
+	"errors"
+	"time"
 )
 
 type FileSession struct {
@@ -31,18 +33,22 @@ type FileSession struct {
 	SessionManager
 }
 
+func (this *FileSession) GetSessionFilePath(id string) string {
+	return this.SessPath + string(os.PathSeparator) + id
+}
+
 func (this *FileSession) OpenSession(ctx context.Context) {
 	this.mLock.Lock()
 	defer this.mLock.Unlock()
-	// TODO Load current valid session
-	// continue...
-	// if client has no sess cookie, generate one jungle id to identify client
-	newSessionID, err := this.NewSessionID()
-	if err == nil {
-		sess := Session{SessID: newSessionID, LastTimeAccessed: time.Now().Unix(), Values: make(map[string] interface{})}
-		this.SetSession(newSessionID, sess)
-		cookie := http.Cookie{Name: this.m_strCookieName, Value: newSessionID, Path: "/", HttpOnly: true, MaxAge: int(this.m_iMaxLifeTime)}
-		http.SetCookie(ctx.ResponseWriter, &cookie)
+	cookie, err := ctx.Request.Cookie(this.m_strCookieName)
+	if err != nil || cookie.Value == "" {
+		newSessionID, err := this.NewSessionID()
+		if err == nil {
+			//sess := Session{SessID: newSessionID, LastTimeAccessed: time.Now().Unix(), Values: make(map[string] interface{})}
+			//this.SetSession(ctx, sess)
+			cookie := http.Cookie{Name: this.m_strCookieName, Value: newSessionID, Path: "/", HttpOnly: true, MaxAge: int(this.m_iMaxLifeTime)}
+			http.SetCookie(ctx.ResponseWriter, &cookie)
+		}
 	}
 }
 
@@ -50,18 +56,57 @@ func (this *FileSession) CloseSession(ctx context.Context) {
 	panic("tobe implements.")
 }
 
-func (this *FileSession) SetSession(id string, session Session) {
-	sess_file_prt, err := os.OpenFile(this.SessPath + string(os.PathSeparator) + id, os.O_RDWR | os.O_CREATE, 0666)
-	if err != nil {
-		fmt.Fprint(sess_file_prt, "asdfsadf")
+func (this *FileSession) SetSession(ctx context.Context, session Session) {
+	this.mLock.Lock()
+	defer this.mLock.Unlock()
+	id := this.LoadCookieValue(ctx)
+	serialize_json, err := json.Marshal(session)
+	if err == nil {
+		_ = ioutil.WriteFile(this.GetSessionFilePath(id), serialize_json, 0666)
 	}
 }
 
-func (this *FileSession) GetSession(id string) Session {
-	panic("tobe implements.")
+func (this *FileSession) Set(ctx context.Context, key string, value interface{})  {
+	session, err := this.GetSession(ctx)
+	if err == nil {
+		session.Values[key] = value
+	} else {
+		session = Session{this.LoadCookieValue(ctx), time.Now().Unix(), make(map[string]interface{})}
+		session.Values[key] = value
+	}
+
+	this.SetSession(ctx, session)
 }
 
-func (this *FileSession) UpdateSession(id string) {
+func (this *FileSession) GetSession(ctx context.Context) (Session, error) {
+	this.mLock.Lock()
+	defer this.mLock.Unlock()
+	id := this.LoadCookieValue(ctx)
+	_, se := os.Stat(this.GetSessionFilePath(id))
+	if se == nil {
+		session_json, err := ioutil.ReadFile(this.GetSessionFilePath(id))
+		if err == nil {
+			var ret_session Session
+			if ue := json.Unmarshal(session_json, ret_session); ue==nil {
+				return ret_session, nil
+			}
+		}
+	}
+	return Session{}, errors.New("load session failure")
+}
+
+func (this *FileSession) Get(ctx context.Context, key string) interface{} {
+	session, err := this.GetSession(ctx)
+	if err != nil {
+		val, ok := session.Values[key]
+		if ok {
+			return val
+		}
+	}
+	return nil
+}
+
+func (this *FileSession) UpdateSession() {
 	panic("tobe implements.")
 }
 

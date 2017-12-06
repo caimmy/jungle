@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"os"
 	"os/signal"
+	"github.com/caimmy/jungle/plugins/session"
 )
 
 var (
@@ -22,7 +23,6 @@ func init() {
 func NewJungleHttpServerHandler() JungleHttpServerHandler {
 	return JungleHttpServerHandler{
 		routers: make(map[string] reflect.Type),
-
 	}
 }
 
@@ -32,6 +32,7 @@ type JungleRootApplication struct {
 
 	TemplateManager *html.TemplatesManager
 	LoggerManager 	*logger.LoggingManager
+	SessionManager	session.SessionMgrInterface
 }
 
 var End_run chan bool

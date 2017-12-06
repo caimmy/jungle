@@ -27,6 +27,11 @@ import (
 	"encoding/base64"
 )
 
+const (
+	FILE_SESSION 		= "file"
+	REDIS_SESSION		= "redis"
+)
+
 var (
 	SESS_ID				string
 )
@@ -38,9 +43,11 @@ func init() {
 type SessionMgrInterface interface {
 	OpenSession(ctx context.Context)
 	CloseSession(ctx context.Context)
-	SetSession(id string, session Session)
-	GetSession(id string) Session
-	UpdateSession(id string)
+	SetSession(ctx context.Context, session Session)
+	Set(ctx context.Context, key string, value interface{})
+	GetSession(ctx context.Context, ) (Session, error)
+	Get(ctx context.Context, key string) interface{}
+	UpdateSession()
 	GC()
 }
 
@@ -57,6 +64,16 @@ type SessionManager struct {
 	mLock					sync.RWMutex
 }
 
+func (this *SessionManager) LoadCookieValue(ctx context.Context) string {
+	cookie, err := ctx.Request.Cookie(this.m_strCookieName)
+	if err != nil || cookie.Value == `` {
+		n_id, _ := this.NewSessionID()
+		return n_id
+	} else {
+		return cookie.Value
+	}
+}
+
 func (this *SessionManager) OpenSession(ctx context.Context) {
 	panic("tobe implements.")
 }
@@ -65,15 +82,23 @@ func (this *SessionManager) CloseSession(ctx context.Context) {
 	panic("tobe implements.")
 }
 
-func (this *SessionManager) SetSession(id string, session Session) {
+func (this *SessionManager) SetSession(ctx context.Context, session Session) {
 	panic("tobe implements.")
 }
 
-func (this *SessionManager) GetSession(id string) Session {
+func (this *SessionManager) Set(ctx context.Context, key string, value interface{}) {
 	panic("tobe implements.")
 }
 
-func (this *SessionManager) UpdateSession(id string) {
+func (this *SessionManager) GetSession(ctx context.Context, ) (Session, error) {
+	panic("tobe implements.")
+}
+
+func (this *SessionManager) Get(ctx context.Context, key string) interface{} {
+	panic("tobe implements.")
+}
+
+func (this *SessionManager) UpdateSession() {
 	panic("tobe implements.")
 }
 
@@ -89,17 +114,17 @@ func (this *SessionManager) NewSessionID() (string, error) {
 	return base64.URLEncoding.EncodeToString(b), nil
 }
 
-func NewSessionManager(sess_type string, max_life int, ext_params map[string] interface{}) (SessionMgrInterface, error)  {
+func NewSessionManager(sess_type string, max_life int, ext_params map[string] interface{}) SessionMgrInterface  {
 	switch strings.ToLower(sess_type) {
-	case "redis":
-		return &RedisSession{SessionManager: SessionManager{m_strCookieName: SESS_ID, m_iMaxLifeTime:max_life}}, nil
-	case "file":
+	case REDIS_SESSION:
+		return &RedisSession{SessionManager: SessionManager{m_strCookieName: SESS_ID, m_iMaxLifeTime:max_life}}
+	case FILE_SESSION:
 		cache_path, ok := ext_params["path"]
-		if ok {
-			return nil, errors.New("not set cache file path for filesession")
+		if !ok {
+			return nil
 		}
-		return &FileSession{SessPath: cache_path.(string), SessionManager: SessionManager{m_strCookieName: SESS_ID, m_iMaxLifeTime:max_life}}, nil
+		return &FileSession{SessPath: cache_path.(string), SessionManager: SessionManager{m_strCookieName: SESS_ID, m_iMaxLifeTime:max_life}}
 	default:
-		return nil, errors.New("unkown session type")
+		return nil
 	}
 }
