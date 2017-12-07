@@ -13,6 +13,10 @@ var (
 	LogPath				string
 	SessionPath			string
 
+	SessionOn			bool
+	// Session life duration on server 30Min
+	SessDuration		int64
+
 	RedisServer			string
 	RedisDb				int
 )
@@ -21,10 +25,12 @@ func init() {
 	TemplatesPath 		= "templates"
 	LogPath				= "logs"
 	SessionPath			= "sessions"
-	JungleApp = NewJungleApp()
+	SessDuration		= 1800
+	SessionOn			= false
 }
 
 func Run() {
+	JungleApp = NewJungleApp()
 	JungleApp.Run()
 }
 
@@ -32,8 +38,13 @@ func NewJungleApp() *JungleRootApplication {
 	app := &JungleRootApplication{
 		TemplateManager: html.NewTemplatesManager(),
 		LoggerManager: logger.NewLoggingManager(LogPath),
-		SessionManager:session.NewSessionManager(session.FILE_SESSION, 0, map[string]interface{}{"path": SessionPath}),
+		//SessionManager: session.NewSessionManager(session.FILE_SESSION, SessDuration, map[string]interface{}{"path": SessionPath}),
 	}
+
+	if SessionOn {
+		app.SessionManager = session.NewSessionManager(session.FILE_SESSION, SessDuration, map[string]interface{}{"path": SessionPath})
+	}
+
 	return app
 }
 

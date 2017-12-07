@@ -25,6 +25,7 @@ import (
 	"io"
 	"crypto/rand"
 	"encoding/base64"
+	"time"
 )
 
 const (
@@ -37,17 +38,17 @@ var (
 )
 
 func init() {
-	SESS_ID = "jungleid"
+	SESS_ID 			= "jungleid"
 }
 
 type SessionMgrInterface interface {
-	OpenSession(ctx context.Context)
-	CloseSession(ctx context.Context)
-	SetSession(ctx context.Context, session Session)
-	Set(ctx context.Context, key string, value interface{})
-	GetSession(ctx context.Context, ) (Session, error)
-	Get(ctx context.Context, key string) interface{}
-	UpdateSession()
+	OpenSession(ctx *context.Context)
+	CloseSession(ctx *context.Context)
+	SetSession(ctx *context.Context, session Session)
+	Set(ctx *context.Context, key string, value interface{})
+	GetSession(ctx *context.Context, ) (Session, error)
+	Get(ctx *context.Context, key string) interface{}
+	UpdateSession(ctx *context.Context)
 	GC()
 }
 
@@ -59,12 +60,11 @@ type Session struct {
 
 type SessionManager struct {
 	m_strCookieName			string
-	m_iMaxLifeTime			int
-
+	m_iMaxlife				int64
 	mLock					sync.RWMutex
 }
 
-func (this *SessionManager) LoadCookieValue(ctx context.Context) string {
+func (this *SessionManager) LoadCookieValue(ctx *context.Context) string {
 	cookie, err := ctx.Request.Cookie(this.m_strCookieName)
 	if err != nil || cookie.Value == `` {
 		n_id, _ := this.NewSessionID()
@@ -74,31 +74,31 @@ func (this *SessionManager) LoadCookieValue(ctx context.Context) string {
 	}
 }
 
-func (this *SessionManager) OpenSession(ctx context.Context) {
+func (this *SessionManager) OpenSession(ctx *context.Context) {
 	panic("tobe implements.")
 }
 
-func (this *SessionManager) CloseSession(ctx context.Context) {
+func (this *SessionManager) CloseSession(ctx *context.Context) {
 	panic("tobe implements.")
 }
 
-func (this *SessionManager) SetSession(ctx context.Context, session Session) {
+func (this *SessionManager) SetSession(ctx *context.Context, session Session) {
 	panic("tobe implements.")
 }
 
-func (this *SessionManager) Set(ctx context.Context, key string, value interface{}) {
+func (this *SessionManager) Set(ctx *context.Context, key string, value interface{}) {
 	panic("tobe implements.")
 }
 
-func (this *SessionManager) GetSession(ctx context.Context, ) (Session, error) {
+func (this *SessionManager) GetSession(ctx *context.Context, ) (Session, error) {
 	panic("tobe implements.")
 }
 
-func (this *SessionManager) Get(ctx context.Context, key string) interface{} {
+func (this *SessionManager) Get(ctx *context.Context, key string) interface{} {
 	panic("tobe implements.")
 }
 
-func (this *SessionManager) UpdateSession() {
+func (this *SessionManager) UpdateSession(ctx *context.Context) {
 	panic("tobe implements.")
 }
 
@@ -114,17 +114,22 @@ func (this *SessionManager) NewSessionID() (string, error) {
 	return base64.URLEncoding.EncodeToString(b), nil
 }
 
-func NewSessionManager(sess_type string, max_life int, ext_params map[string] interface{}) SessionMgrInterface  {
+func NewSessionManager(sess_type string, iMaxlife int64, ext_params map[string] interface{}) SessionMgrInterface  {
+	var ret_session_manager SessionMgrInterface
 	switch strings.ToLower(sess_type) {
 	case REDIS_SESSION:
-		return &RedisSession{SessionManager: SessionManager{m_strCookieName: SESS_ID, m_iMaxLifeTime:max_life}}
+		ret_session_manager = &RedisSession{SessionManager: SessionManager{m_strCookieName: SESS_ID, m_iMaxlife: iMaxlife}}
 	case FILE_SESSION:
 		cache_path, ok := ext_params["path"]
 		if !ok {
 			return nil
 		}
-		return &FileSession{SessPath: cache_path.(string), SessionManager: SessionManager{m_strCookieName: SESS_ID, m_iMaxLifeTime:max_life}}
-	default:
-		return nil
+		ret_session_manager = &FileSession{SessPath: cache_path.(string), SessionManager: SessionManager{m_strCookieName: SESS_ID, m_iMaxlife: iMaxlife}}
 	}
+	go ret_session_manager.GC()
+	return ret_session_manager
+}
+
+func NewSessionObject() *Session  {
+	return &Session{SESS_ID, time.Now().Unix(), make(map[string] interface{})}
 }

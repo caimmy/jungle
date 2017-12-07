@@ -37,26 +37,35 @@ func (this *FileSession) GetSessionFilePath(id string) string {
 	return this.SessPath + string(os.PathSeparator) + id
 }
 
-func (this *FileSession) OpenSession(ctx context.Context) {
+func (this *FileSession) OpenSession(ctx *context.Context) {
 	this.mLock.Lock()
 	defer this.mLock.Unlock()
 	cookie, err := ctx.Request.Cookie(this.m_strCookieName)
 	if err != nil || cookie.Value == "" {
 		newSessionID, err := this.NewSessionID()
 		if err == nil {
-			//sess := Session{SessID: newSessionID, LastTimeAccessed: time.Now().Unix(), Values: make(map[string] interface{})}
-			//this.SetSession(ctx, sess)
-			cookie := http.Cookie{Name: this.m_strCookieName, Value: newSessionID, Path: "/", HttpOnly: true, MaxAge: int(this.m_iMaxLifeTime)}
+			this.SetSession(ctx, *NewSessionObject())
+			cookie := http.Cookie{Name: this.m_strCookieName, Value: newSessionID, Path: "/", HttpOnly: true, MaxAge: 0}
 			http.SetCookie(ctx.ResponseWriter, &cookie)
 		}
 	}
 }
 
-func (this *FileSession) CloseSession(ctx context.Context) {
+func (this *FileSession) UpdateSession(ctx *context.Context)  {
+	cursess, err := this.GetSession(ctx)
+	if err == nil {
+		cursess.LastTimeAccessed = time.Now().Unix()
+		this.SetSession(ctx, cursess)
+	} else {
+		this.SetSession(ctx, *NewSessionObject())
+	}
+}
+
+func (this *FileSession) CloseSession(ctx *context.Context) {
 	panic("tobe implements.")
 }
 
-func (this *FileSession) SetSession(ctx context.Context, session Session) {
+func (this *FileSession) SetSession(ctx *context.Context, session Session) {
 	this.mLock.Lock()
 	defer this.mLock.Unlock()
 	id := this.LoadCookieValue(ctx)
@@ -66,7 +75,7 @@ func (this *FileSession) SetSession(ctx context.Context, session Session) {
 	}
 }
 
-func (this *FileSession) Set(ctx context.Context, key string, value interface{})  {
+func (this *FileSession) Set(ctx *context.Context, key string, value interface{})  {
 	session, err := this.GetSession(ctx)
 	if err == nil {
 		session.Values[key] = value
@@ -78,7 +87,7 @@ func (this *FileSession) Set(ctx context.Context, key string, value interface{})
 	this.SetSession(ctx, session)
 }
 
-func (this *FileSession) GetSession(ctx context.Context) (Session, error) {
+func (this *FileSession) GetSession(ctx *context.Context) (Session, error) {
 	this.mLock.Lock()
 	defer this.mLock.Unlock()
 	id := this.LoadCookieValue(ctx)
@@ -87,7 +96,7 @@ func (this *FileSession) GetSession(ctx context.Context) (Session, error) {
 		session_json, err := ioutil.ReadFile(this.GetSessionFilePath(id))
 		if err == nil {
 			var ret_session Session
-			if ue := json.Unmarshal(session_json, ret_session); ue==nil {
+			if ue := json.Unmarshal(session_json, &ret_session); ue==nil && (ret_session.LastTimeAccessed + this.m_iMaxlife > time.Now().Unix()) {
 				return ret_session, nil
 			}
 		}
@@ -95,9 +104,9 @@ func (this *FileSession) GetSession(ctx context.Context) (Session, error) {
 	return Session{}, errors.New("load session failure")
 }
 
-func (this *FileSession) Get(ctx context.Context, key string) interface{} {
+func (this *FileSession) Get(ctx *context.Context, key string) interface{} {
 	session, err := this.GetSession(ctx)
-	if err != nil {
+	if err == nil {
 		val, ok := session.Values[key]
 		if ok {
 			return val
@@ -106,10 +115,27 @@ func (this *FileSession) Get(ctx context.Context, key string) interface{} {
 	return nil
 }
 
-func (this *FileSession) UpdateSession() {
-	panic("tobe implements.")
-}
-
 func (this *FileSession) GC() {
-	panic("tobe implements.")
+	this.mLock.Lock()
+	defer this.mLock.Unlock()
+	dir, err := ioutil.ReadDir(this.SessPath)
+	if err == nil {
+		for _, finfo := range dir {
+			if !finfo.IsDir() {
+				sess_file_path := this.SessPath + string(os.PathSeparator) + finfo.Name()
+				sess_content, err := ioutil.ReadFile(sess_file_path)
+				if err == nil {
+					var sessionObj Session
+					if er := json.Unmarshal(sess_content, &sessionObj); er == nil {
+						if time.Now().Unix() > sessionObj.LastTimeAccessed + this.m_iMaxlife {
+							os.Remove(sess_file_path)
+						}
+					}
+				}
+			}
+		}
+	}
+	time.AfterFunc(time.Second * 10, func() {
+		this.GC()
+	})
 }

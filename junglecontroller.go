@@ -61,16 +61,24 @@ func (c *JungleController) Init(cptr *ControllerInterface, w http.ResponseWriter
 }
 
 func (c *JungleController) SetSession(key string, value interface{}) {
-	JungleApp.SessionManager.Set(c.Ctx, key, value)
+	if JungleApp.SessionManager != nil {
+		JungleApp.SessionManager.Set(&c.Ctx, key, value)
+	}
 }
 
 func (c *JungleController) GetSession(key string) interface{} {
-	return JungleApp.SessionManager.Get(c.Ctx, key)
+	if JungleApp.SessionManager != nil {
+		return JungleApp.SessionManager.Get(&c.Ctx, key)
+	}
+	return nil
 }
 
 func (c *JungleController) Prepare() {
 	// 开启全局会话管理器
-	JungleApp.SessionManager.OpenSession(c.Ctx)
+	if JungleApp.SessionManager != nil {
+		JungleApp.SessionManager.OpenSession(&c.Ctx)
+		JungleApp.SessionManager.UpdateSession(&c.Ctx)
+	}
 }
 
 func (c *JungleController) Get() {
