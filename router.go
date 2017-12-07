@@ -1,4 +1,4 @@
-// Copyright 2014 jungle Author. All Rights Reserved.
+// Copyright 2017 jungle Author. All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -18,30 +18,44 @@
 package jungle
 
 import (
-	"net/http"
 	"io"
+	"net/http"
+	"reflect"
 )
 
 type JungleHttpServerHandler struct {
-	routers			map[string] ControllerInterface
+	routers			map[string] reflect.Type
 }
 
 func (hander *JungleHttpServerHandler)ServeHTTP(w http.ResponseWriter, r *http.Request)  {
+	/*
+	defer func() {
+		r := recover()
+		if r != nil {
+			log.Printf("runtime error %v", r)
+			fmt.Fprintf(w, "runtime error %v", r)
+		}
+	}()
+	*/
 	if (len(hander.routers) == 0) {
 		io.WriteString(w, "Welcome to Jungle, make up your first JungleController please!")
 	} else {
-		controller, ok := hander.routers[r.RequestURI]
+		predef_controller, ok 			:= hander.routers[r.RequestURI]
+
 		if ok {
-			switch r.Method {
-			case "GET":
-				controller.Get(w, r)
-			default:
-				io.WriteString(w, "Hello, Jungle!")
-			}
+			controller := reflect.New(predef_controller).Interface().(ControllerInterface)
+			controller.Init(&controller, w, r)
+			controller.Action()
+		} else {
+			http.NotFound(w, r)
 		}
+
 	}
 }
 
 func (hander *JungleHttpServerHandler)Add(pattern string, c ControllerInterface)  {
-	hander.routers[pattern] = c
+	reflectVal := reflect.ValueOf(c)
+	t := reflect.Indirect(reflectVal).Type()
+
+	hander.routers[pattern] = t
 }

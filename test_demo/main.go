@@ -1,4 +1,4 @@
-// Copyright 2014 jungle Author. All Rights Reserved.
+// Copyright 2017 jungle Author. All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -19,19 +19,50 @@ package main
 
 import (
 	"github.com/caimmy/jungle"
-	"net/http"
-	"io"
+	"fmt"
 )
 
 type CaimmyController struct {
 	jungle.JungleController
 }
 
-func (c *CaimmyController)Get(w http.ResponseWriter, r *http.Request) {
-	io.WriteString(w, "sadfsdfsdfasdfsdfa caimmy controller")
+func (c *CaimmyController)Get() {
+	param := make(map[string] interface{})
+	param["name"] = "caimmy"
+	param["days"] = 10
+	c.Render("test.phtml", param)
 }
 
+func (c *CaimmyController)Post()  {
+	param := make(map[string] interface{})
+	param["name"] = "alsdfj撒旦浪费就"
+	param["days"] = 90
+	c.RenderPartial("test.phtml", param)
+}
+
+func (c *CaimmyController)Prepare() {
+	c.JungleController.Prepare()
+	fmt.Println("caimmycontroller's prepare function called")
+}
+
+/*
+func (c *CaimmyController)Post(w jungle.JungleResponseWriter, r *jungle.JungleRequest) {
+	io.WriteString(w, "abcdefg by POST")
+}
+*/
+
 func main() {
-	jungle.Router("/", &CaimmyController{})
+	caimmyController := CaimmyController{}
+	jungle.Router("/", &caimmyController)
+	jungle.TemplatesPath = "templates"
 	jungle.Run()
+	/*
+	m := reflect.TypeOf(CaimmyController{})
+	p := reflect.New(m)
+	f := p.MethodByName("Prepare")
+	fmt.Printf("a : %v\n", f)
+	params := make([]reflect.Value, 0)
+	f.Call(params)
+	fmt.Println("asdfasdf")
+	*/
 }

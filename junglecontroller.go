@@ -1,4 +1,4 @@
-// Copyright 2014 jungle Author. All Rights Reserved.
+// Copyright 2017 jungle Author. All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -19,44 +19,129 @@ package jungle
 
 import (
 	"net/http"
+	"html/template"
+	"strings"
+	"io"
+	"os"
+	"bytes"
+	"github.com/caimmy/jungle/context"
 )
 
 type ControllerInterface interface {
-	Init()
+	Init(cptr *ControllerInterface, w http.ResponseWriter, r *http.Request)
 	Prepare()
-	Get(http.ResponseWriter, *http.Request)
-	Post(http.ResponseWriter, *http.Request)
-	Put(http.ResponseWriter, *http.Request)
-	Delete(http.ResponseWriter, *http.Request)
+	Action()
+
+	Get()
+	Post()
+	Put()
+	Delete()
 }
 
 type JungleController struct {
-	// Templates setting
-	TplName		 	string
-	Layout 			string
+	Ctx 			context.Context
 
+	// Templates setting
+	TplPath		 	string
+	Layout 			string
+	cache_layout 	template.Template
+
+	// Runtime Instances
+	instance_prt	*ControllerInterface
 }
 
-func (c *JungleController) Init() {
-	panic("need impleted!")
+// intialize controller instance.
+// cptr params ControllerInterface : receive a instance to pointer the final Implements of JungleController
+func (c *JungleController) Init(cptr *ControllerInterface, w http.ResponseWriter, r *http.Request) {
+	c.Ctx.ResponseWriter	= w
+	c.Ctx.Request 			= r
+
+	c.instance_prt  		= cptr
+	(*c.instance_prt).Prepare()
+}
+
+func (c *JungleController) SetSession(key string, value interface{}) {
+	if JungleApp.SessionManager != nil {
+		JungleApp.SessionManager.Set(&c.Ctx, key, value)
+	}
+}
+
+func (c *JungleController) GetSession(key string) interface{} {
+	if JungleApp.SessionManager != nil {
+		return JungleApp.SessionManager.Get(&c.Ctx, key)
+	}
+	return nil
 }
 
 func (c *JungleController) Prepare() {
-	panic("need impleted!")
+	// 开启全局会话管理器
+	if JungleApp.SessionManager != nil {
+		JungleApp.SessionManager.OpenSession(&c.Ctx)
+		JungleApp.SessionManager.UpdateSession(&c.Ctx)
+	}
 }
 
-func (c *JungleController) Get(w http.ResponseWriter, r *http.Request) {
-	panic("need impleted!")
+func (c *JungleController) Get() {
+	c.ResponseError("Method not Allowed", http.StatusMethodNotAllowed)
 }
 
-func (c *JungleController) Post(w http.ResponseWriter, r *http.Request) {
-	panic("need impleted!")
+func (c *JungleController) Post() {
+	c.ResponseError("Method not Allowed", http.StatusMethodNotAllowed)
 }
 
-func (c *JungleController) Put(w http.ResponseWriter, r *http.Request) {
-	panic("need impleted!")
+func (c *JungleController) Put() {
+	c.ResponseError("Method not Allowed", http.StatusMethodNotAllowed)
 }
 
-func (c *JungleController) Delete(w http.ResponseWriter, r *http.Request) {
-	panic("need impleted!")
+func (c *JungleController) Delete() {
+	c.ResponseError("Method not Allowed", http.StatusMethodNotAllowed)
+}
+
+func (c* JungleController) Action() {
+	switch strings.ToUpper(c.Ctx.Request.Method) {
+	case METHOD_GET:
+		(*c.instance_prt).Get()
+	case METHOD_POST:
+		(*c.instance_prt).Post()
+	case METHOD_PUT:
+		(*c.instance_prt).Put()
+	case METHOD_DELETE:
+		(*c.instance_prt).Delete()
+	default:
+		c.ResponseError("Method not Allowed", http.StatusMethodNotAllowed)
+	}
+}
+
+// Response standard Error information to client
+func (c *JungleController) ResponseError(err_msg string, err_code int) {
+	http.Error(c.Ctx.ResponseWriter, err_msg, err_code)
+}
+
+func (c *JungleController) Render(tplfile string, tpl_params map[string] interface{}) {
+	// cached and prehot template in TplManager
+	content_str := bytes.NewBufferString("")
+	JungleApp.TemplateManager.RenderHtml(content_str, TemplatesPath + string(os.PathSeparator) + tplfile, tpl_params)
+	layout_template := JungleApp.TemplateManager.LoadLayout(TemplatesPath + string(os.PathSeparator) + "/layout/layout.phtml")
+	layout_template.Execute(c.Ctx.ResponseWriter, template.HTML(content_str.String()))
+}
+
+func (c *JungleController) RenderPartial(tplfile string, tpl_params map[string] interface{})  {
+	// cached and prehot template in TplManager
+	JungleApp.TemplateManager.RenderHtml(c.Ctx.ResponseWriter, TemplatesPath + string(os.PathSeparator) + tplfile, tpl_params)
+}
+
+func (c *JungleController) Echo(content string) {
+	io.WriteString(c.Ctx.ResponseWriter, content)
+}
+
+func (c *JungleController) SetLayout(layout string) {
+	c.Layout = layout
+	if (c.Layout != "") {
+		_t_layout, err := template.ParseFiles(c.Layout)
+		if err != nil {
+			panic("layout template not found")
+		} else {
+			c.cache_layout = *_t_layout
+		}
+	}
 }
