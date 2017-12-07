@@ -21,6 +21,8 @@ import (
 	"io"
 	"net/http"
 	"reflect"
+	"github.com/caimmy/jungle/plugins/Blueprint"
+	"strings"
 )
 
 type JungleHttpServerHandler struct {
@@ -58,4 +60,14 @@ func (hander *JungleHttpServerHandler)Add(pattern string, c ControllerInterface)
 	t := reflect.Indirect(reflectVal).Type()
 
 	hander.routers[pattern] = t
+}
+
+func (hander *JungleHttpServerHandler)AddBlueprint(prefix string, bp *Blueprint.Blueprint) {
+	if 0 != strings.Index(prefix, "/") {
+		prefix = "/" + prefix
+	}
+	for r, v := range *bp.GetRouter() {
+		bp_prefix := prefix + r
+		hander.routers[bp_prefix] = v
+	}
 }
