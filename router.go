@@ -21,7 +21,7 @@ import (
 	"io"
 	"net/http"
 	"reflect"
-	"github.com/caimmy/jungle/plugins/Blueprint"
+	"github.com/caimmy/jungle/plugins/blueprint"
 	"strings"
 )
 
@@ -62,7 +62,7 @@ func (hander *JungleHttpServerHandler)Add(pattern string, c ControllerInterface)
 	hander.routers[pattern] = t
 }
 
-func (hander *JungleHttpServerHandler)AddBlueprint(prefix string, bp *Blueprint.Blueprint) {
+func (hander *JungleHttpServerHandler)AddBlueprint(prefix string, bp *blueprint.Blueprint) {
 	if 0 != strings.Index(prefix, "/") {
 		prefix = "/" + prefix
 	}

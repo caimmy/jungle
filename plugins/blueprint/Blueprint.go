@@ -15,7 +15,7 @@
 // date     : 2017/12/7 16:21
 // author   : caimmy@hotmail.com
 
-package Blueprint
+package blueprint
 
 import (
 	"reflect"
