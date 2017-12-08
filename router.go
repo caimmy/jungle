@@ -23,7 +23,6 @@ import (
 	"reflect"
 	"github.com/caimmy/jungle/plugins/blueprint"
 	"strings"
-	"fmt"
 )
 
 type JungleHttpServerHandler struct {
@@ -31,25 +30,11 @@ type JungleHttpServerHandler struct {
 }
 
 func (hander *JungleHttpServerHandler)ServeHTTP(w http.ResponseWriter, r *http.Request)  {
-	/*
-	defer func() {
-		r := recover()
-		if r != nil {
-			log.Printf("runtime error %v", r)
-			fmt.Fprintf(w, "runtime error %v", r)
-		}
-	}()
-	*/
-
 	valid_uri := r.RequestURI
 	uri_end_pos := strings.Index(valid_uri, "?")
 	if uri_end_pos >= 0 {
 		valid_uri = r.RequestURI[0 : uri_end_pos]
 	}
-
-	fmt.Println("request arrived")
-	fmt.Println(r.RequestURI)
-	fmt.Println(valid_uri)
 
 	if (len(hander.routers) == 0) {
 		io.WriteString(w, "Welcome to Jungle, make up your first JungleController please!")
@@ -63,7 +48,6 @@ func (hander *JungleHttpServerHandler)ServeHTTP(w http.ResponseWriter, r *http.R
 		} else {
 			http.NotFound(w, r)
 		}
-
 	}
 }
 
