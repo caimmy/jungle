@@ -21,8 +21,8 @@ import "testing"
 
 func TestNewBlueprint(t *testing.T) {
 	bp := NewBlueprint()
-	if bp != nil {
-		t.Errorf("asdfasdfasdf")
+	if bp == nil {
+		t.Errorf("NewBlueprint failure!")
 	}
 
 }
