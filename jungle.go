@@ -4,6 +4,7 @@ import (
 	"github.com/caimmy/jungle/html"
 	"github.com/caimmy/jungle/plugins/logger"
 	"github.com/caimmy/jungle/plugins/session"
+	"github.com/caimmy/jungle/plugins/blueprint"
 )
 
 // Config params for Top Application
@@ -51,4 +52,8 @@ func NewJungleApp() *JungleRootApplication {
 // raw add router information for http server
 func Router(prefix string, controller ControllerInterface) {
 	Global_JungleHttpServerHandler.Add(prefix, controller)
+}
+
+func AddBlueprint(prefix string, blueprint *blueprint.Blueprint) {
+	Global_JungleHttpServerHandler.AddBlueprint(prefix, blueprint)
 }

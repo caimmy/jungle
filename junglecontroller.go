@@ -25,6 +25,7 @@ import (
 	"os"
 	"bytes"
 	"github.com/caimmy/jungle/context"
+	"fmt"
 )
 
 type ControllerInterface interface {
@@ -122,6 +123,7 @@ func (c *JungleController) Render(tplfile string, tpl_params map[string] interfa
 	content_str := bytes.NewBufferString("")
 	JungleApp.TemplateManager.RenderHtml(content_str, TemplatesPath + string(os.PathSeparator) + tplfile, tpl_params)
 	layout_template := JungleApp.TemplateManager.LoadLayout(TemplatesPath + string(os.PathSeparator) + "/layout/layout.phtml")
+	fmt.Println(content_str.String())
 	layout_template.Execute(c.Ctx.ResponseWriter, template.HTML(content_str.String()))
 }
 

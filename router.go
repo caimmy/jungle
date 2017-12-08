@@ -21,6 +21,8 @@ import (
 	"io"
 	"net/http"
 	"reflect"
+	"github.com/caimmy/jungle/plugins/blueprint"
+	"strings"
 )
 
 type JungleHttpServerHandler struct {
@@ -28,19 +30,16 @@ type JungleHttpServerHandler struct {
 }
 
 func (hander *JungleHttpServerHandler)ServeHTTP(w http.ResponseWriter, r *http.Request)  {
-	/*
-	defer func() {
-		r := recover()
-		if r != nil {
-			log.Printf("runtime error %v", r)
-			fmt.Fprintf(w, "runtime error %v", r)
-		}
-	}()
-	*/
+	valid_uri := r.RequestURI
+	uri_end_pos := strings.Index(valid_uri, "?")
+	if uri_end_pos >= 0 {
+		valid_uri = r.RequestURI[0 : uri_end_pos]
+	}
+
 	if (len(hander.routers) == 0) {
 		io.WriteString(w, "Welcome to Jungle, make up your first JungleController please!")
 	} else {
-		predef_controller, ok 			:= hander.routers[r.RequestURI]
+		predef_controller, ok 			:= hander.routers[valid_uri]
 
 		if ok {
 			controller := reflect.New(predef_controller).Interface().(ControllerInterface)
@@ -49,7 +48,6 @@ func (hander *JungleHttpServerHandler)ServeHTTP(w http.ResponseWriter, r *http.R
 		} else {
 			http.NotFound(w, r)
 		}
-
 	}
 }
 
@@ -58,4 +56,14 @@ func (hander *JungleHttpServerHandler)Add(pattern string, c ControllerInterface)
 	t := reflect.Indirect(reflectVal).Type()
 
 	hander.routers[pattern] = t
+}
+
+func (hander *JungleHttpServerHandler)AddBlueprint(prefix string, bp *blueprint.Blueprint) {
+	if 0 != strings.Index(prefix, "/") {
+		prefix = "/" + prefix
+	}
+	for r, v := range *bp.GetRouter() {
+		bp_prefix := prefix + r
+		hander.routers[bp_prefix] = v
+	}
 }
