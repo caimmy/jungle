@@ -19,6 +19,7 @@ package jungle
 
 import (
 	"net/http"
+	"html"
 	"html/template"
 	"strings"
 	"io"
@@ -145,6 +146,7 @@ func (c *JungleController) RenderPartial(tplfile string, tpl_params map[string] 
 }
 
 func (c *JungleController) Echo(content string) {
+	content = html.EscapeString(content)
 	io.WriteString(c.Ctx.ResponseWriter, content)
 }
 
