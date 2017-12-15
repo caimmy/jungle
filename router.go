@@ -40,6 +40,9 @@ func (hander *JungleHttpServerHandler)ServeHTTP(w http.ResponseWriter, r *http.R
 		io.WriteString(w, "Welcome to Jungle, make up your first JungleController please!")
 	} else {
 		predef_controller, ok 			:= hander.routers[valid_uri]
+		if !ok {
+			predef_controller, ok = hander.routers[valid_uri + "/"]
+		}
 
 		if ok {
 			controller := reflect.New(predef_controller).Interface().(ControllerInterface)
