@@ -44,10 +44,28 @@ func (uf *UploadFile) Release() {
 }
 
 func (uf *UploadFile) GetContentType() string {
-	type_string, ok := "", true//uf.FileHeader.Header["Content-Type"]
-	if ok {
-		return string(type_string)
+	type_collection, ok := uf.FileHeader.Header["Content-Type"]
+	if ok && len(type_collection) > 0 {
+		return type_collection[0]
 	} else {
 		return ""
 	}
+}
+
+/**
+check uploadfile is specialize content-type or not
+@return bool
+ */
+func (uf *UploadFile) HasContentType(content_type string) bool {
+	ret_existed_check := false
+	type_collection, ok := uf.FileHeader.Header["Content-Type"]
+	if ok {
+		for _, val := range type_collection {
+			if content_type == val {
+				ret_existed_check = true
+				break
+			}
+		}
+	}
+	return ret_existed_check
 }
