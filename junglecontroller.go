@@ -25,13 +25,16 @@ import (
 	"os"
 	"bytes"
 	"github.com/caimmy/jungle/context"
-	"fmt"
+	"github.com/caimmy/jungle/web"
+	"errors"
 )
 
 type ControllerInterface interface {
 	Init(cptr *ControllerInterface, w http.ResponseWriter, r *http.Request)
 	Prepare()
 	Action()
+	BeforeAction()
+	AfterAction()
 
 	Get()
 	Post()
@@ -99,6 +102,7 @@ func (c *JungleController) Delete() {
 }
 
 func (c* JungleController) Action() {
+	(*c.instance_prt).BeforeAction()
 	switch strings.ToUpper(c.Ctx.Request.Method) {
 	case METHOD_GET:
 		(*c.instance_prt).Get()
@@ -111,6 +115,15 @@ func (c* JungleController) Action() {
 	default:
 		c.ResponseError("Method not Allowed", http.StatusMethodNotAllowed)
 	}
+	(*c.instance_prt).AfterAction()
+}
+
+func (c *JungleController) BeforeAction() {
+	c.Ctx.Request.ParseForm()
+}
+
+func (c *JungleController) AfterAction() {
+
 }
 
 // Response standard Error information to client
@@ -123,7 +136,6 @@ func (c *JungleController) Render(tplfile string, tpl_params map[string] interfa
 	content_str := bytes.NewBufferString("")
 	JungleApp.TemplateManager.RenderHtml(content_str, TemplatesPath + string(os.PathSeparator) + tplfile, tpl_params)
 	layout_template := JungleApp.TemplateManager.LoadLayout(TemplatesPath + string(os.PathSeparator) + "/layout/layout.phtml")
-	fmt.Println(content_str.String())
 	layout_template.Execute(c.Ctx.ResponseWriter, template.HTML(content_str.String()))
 }
 
@@ -145,5 +157,14 @@ func (c *JungleController) SetLayout(layout string) {
 		} else {
 			c.cache_layout = *_t_layout
 		}
+	}
+}
+
+func (c *JungleController) GetInstancesByName(filename string) (*web.UploadFile, error) {
+	file, handler, err := c.Ctx.Request.FormFile(filename)
+	if err == nil {
+		return &web.UploadFile{FileHeader:handler, File:file}, nil
+	} else {
+		return nil, errors.New("not find file")
 	}
 }
