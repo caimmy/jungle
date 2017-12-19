@@ -145,8 +145,10 @@ func (c *JungleController) RenderPartial(tplfile string, tpl_params map[string] 
 	JungleApp.TemplateManager.RenderHtml(c.Ctx.ResponseWriter, TemplatesPath + string(os.PathSeparator) + tplfile, tpl_params)
 }
 
-func (c *JungleController) Echo(content string) {
-	content = html.EscapeString(content)
+func (c *JungleController) Echo(content string, asHtml bool) {
+	if !asHtml {
+		content = html.EscapeString(content)
+	}
 	io.WriteString(c.Ctx.ResponseWriter, content)
 }
 
