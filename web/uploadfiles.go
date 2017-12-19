@@ -29,7 +29,7 @@ type UploadFile struct {
 }
 
 func (uf *UploadFile) SaveAs(descpath string) error{
-	f, err := os.OpenFile(descpath, os.O_CREATE, 0666)
+	f, err := os.OpenFile(descpath, os.O_CREATE | os.O_WRONLY, 0666)
 	defer f.Close()
 	if err == nil {
 		_, cperr := io.Copy(f, uf.File)
