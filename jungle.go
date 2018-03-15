@@ -30,9 +30,9 @@ func init() {
 	SessionOn			= false
 }
 
-func Run() {
+func Run(listen_server string) {
 	JungleApp = NewJungleApp()
-	JungleApp.Run()
+	JungleApp.Run(listen_server)
 }
 
 func NewJungleApp() *JungleRootApplication {
