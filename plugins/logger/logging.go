@@ -30,6 +30,7 @@ func NewLoggingManager (logPath string) *LoggingManager {
 		LoggingPath: logPath,
 		LoggingCached: make([]interface{}, 0, 1000),
 	}
+	logging_instance.CreateLogDir()
 	logging_instance.StartRecord()
 	return logging_instance
 }
@@ -75,6 +76,19 @@ func (this *LoggingManager) Dumplogs() {
 		this.LoggingCached = append([]interface{}{})
 		this.logger_file_prt.Sync()
 	}
+}
+
+func (this *LoggingManager) CreateLogDir() bool {
+	_, err := os.Stat(this.LoggingPath)
+	if err == nil {
+		return true
+	} else {
+		if os.IsNotExist(err) {
+			err = os.Mkdir(this.LoggingPath, 0777)
+			return err == nil
+		}
+	}
+	return false
 }
 
 func (this *LoggingManager) CreateLogger() {

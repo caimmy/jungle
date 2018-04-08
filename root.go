@@ -44,7 +44,7 @@ func (app *JungleRootApplication) Run(listen_serv string) {
 	main_http_server.Handler = &Global_JungleHttpServerHandler
 	go func() {
 		main_http_server.ListenAndServe()
-		fmt.Println("asdfasfsadf end")
+		fmt.Println("web server started")
 	}()
 	End_Application = make(chan os.Signal, 1)
 	signal.Notify(End_Application, os.Interrupt, os.Kill)

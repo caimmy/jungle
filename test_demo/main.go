@@ -55,7 +55,7 @@ func main() {
 	caimmyController := CaimmyController{}
 	jungle.Router("/", &caimmyController)
 	jungle.TemplatesPath = "templates"
-	jungle.Run()
+	jungle.Run("127.0.0.1:9527")
 	/*
 	m := reflect.TypeOf(CaimmyController{})
 	p := reflect.New(m)
