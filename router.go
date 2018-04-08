@@ -23,50 +23,83 @@ import (
 	"reflect"
 	"github.com/caimmy/jungle/plugins/blueprint"
 	"strings"
+	"os"
 )
 
 type JungleHttpServerHandler struct {
 	routers			map[string] reflect.Type
+	ws_routers		map[string] func(w http.ResponseWriter, r *http.Request)
 }
 
-func (hander *JungleHttpServerHandler)ServeHTTP(w http.ResponseWriter, r *http.Request)  {
+func (handler *JungleHttpServerHandler)ServeHTTP(w http.ResponseWriter, r *http.Request)  {
+	if !handler.filterRunWebsocketRequest(w, r) {
+		handler.filterRunWebRequest(w, r)
+	}
+}
+
+func (handler *JungleHttpServerHandler)filterRunStaticFile(w http.ResponseWriter, r *http.Request, name string) bool {
+	http.ServeFile(w, r, name)
+	return true
+}
+
+func (handler *JungleHttpServerHandler)filterRunWebsocketRequest(w http.ResponseWriter, r *http.Request) bool {
+	prefix_matched := false
+
+	predef_handler, ok 		:= handler.ws_routers[r.RequestURI]
+	if ok {
+		predef_handler(w, r)
+		prefix_matched = true
+	}
+
+	return prefix_matched
+}
+
+func (handler *JungleHttpServerHandler)filterRunWebRequest(w http.ResponseWriter, r *http.Request) bool {
+	prefix_matched := false
 	valid_uri := r.RequestURI
 	uri_end_pos := strings.Index(valid_uri, "?")
 	if uri_end_pos >= 0 {
 		valid_uri = r.RequestURI[0 : uri_end_pos]
 	}
 
-	if (len(hander.routers) == 0) {
+	if (len(handler.routers) == 0) {
 		io.WriteString(w, "Welcome to Jungle, make up your first JungleController please!")
 	} else {
-		predef_controller, ok 			:= hander.routers[valid_uri]
+		predef_controller, ok 			:= handler.routers[valid_uri]
 		if !ok {
-			predef_controller, ok = hander.routers[valid_uri + "/"]
+			predef_controller, ok = handler.routers[valid_uri + "/"]
 		}
 
 		if ok {
 			controller := reflect.New(predef_controller).Interface().(ControllerInterface)
 			controller.Init(&controller, w, r)
 			controller.Action()
+			prefix_matched = true
 		} else {
+			handler.filterRunStaticFile(w, r, StaticFilePath + string(os.PathSeparator) + strings.Replace(valid_uri, "/", string(os.PathSeparator), -1))
 			http.NotFound(w, r)
 		}
 	}
+	return prefix_matched
 }
 
-func (hander *JungleHttpServerHandler)Add(pattern string, c ControllerInterface)  {
+func (handler *JungleHttpServerHandler)AddWsHannler(pattern string, callback func(w http.ResponseWriter, r *http.Request)) {
+	handler.ws_routers[pattern] = callback
+}
+
+func (handler *JungleHttpServerHandler)Add(pattern string, c ControllerInterface)  {
 	reflectVal := reflect.ValueOf(c)
 	t := reflect.Indirect(reflectVal).Type()
 
-	hander.routers[pattern] = t
+	handler.routers[pattern] = t
 }
 
-func (hander *JungleHttpServerHandler)AddBlueprint(prefix string, bp *blueprint.Blueprint) {
+func (handler *JungleHttpServerHandler)AddBlueprint(prefix string, bp *blueprint.Blueprint) {
 	if 0 != strings.Index(prefix, "/") {
 		prefix = "/" + prefix
 	}
 	for r, v := range *bp.GetRouter() {
 		bp_prefix := prefix + r
-		hander.routers[bp_prefix] = v
+		handler.routers[bp_prefix] = v
 	}
 }

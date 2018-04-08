@@ -12,6 +12,7 @@ import (
 var (
 	JungleApp 			*JungleRootApplication
 	TemplatesPath		string
+	StaticFilePath		string
 	LogPath				string
 	SessionPath			string
 
@@ -25,6 +26,7 @@ var (
 
 func init() {
 	TemplatesPath 		= "templates"
+	StaticFilePath		= "static"
 	LogPath				= "logs"
 	SessionPath			= "sessions"
 	SessDuration		= 1800
@@ -57,7 +59,7 @@ func Router(prefix string, controller ControllerInterface) {
 
 // Register websocket callback function
 func WebsocketRouter(prefix string, ws_func func(w http.ResponseWriter, r *http.Request))  {
-	http.DefaultServeMux.HandleFunc(prefix, ws_func)
+	Global_JungleHttpServerHandler.AddWsHannler(prefix, ws_func)
 }
 
 func AddBlueprint(prefix string, blueprint *blueprint.Blueprint) {

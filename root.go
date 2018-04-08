@@ -17,13 +17,14 @@ var (
 )
 
 func init() {
-	Global_JungleHttpServerHandler = NewJungleHttpServerHandler()
+	Global_JungleHttpServerHandler = *NewJungleHttpServerHandler()
 }
 
-func NewJungleHttpServerHandler() JungleHttpServerHandler {
-	return JungleHttpServerHandler{
-		routers: make(map[string] reflect.Type),
-	}
+func NewJungleHttpServerHandler() *JungleHttpServerHandler {
+	gen_jungleHttpServerHandler := JungleHttpServerHandler{}
+	gen_jungleHttpServerHandler.routers = make(map[string] reflect.Type)
+	gen_jungleHttpServerHandler.ws_routers = make(map[string] func(w http.ResponseWriter, r *http.Request))
+	return &gen_jungleHttpServerHandler
 }
 
 type JungleRootApplication struct {
