@@ -20,15 +20,14 @@ package context
 import "net/http"
 
 type JungleInput struct {
-
 }
 
 type JungleOutput struct {
-	Status 			int
-	EnableGzip 		bool
+	Status     int
+	EnableGzip bool
 }
 
 type Context struct {
-	Request 		*http.Request
-	ResponseWriter 	http.ResponseWriter
+	Request        *http.Request
+	ResponseWriter http.ResponseWriter
 }
