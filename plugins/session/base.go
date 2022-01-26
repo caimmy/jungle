@@ -22,10 +22,11 @@ import (
 	"encoding/base64"
 	"errors"
 	"io"
-	"jungle/context"
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/caimmy/jungle/context"
 )
 
 const (
