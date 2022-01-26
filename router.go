@@ -19,10 +19,11 @@ package jungle
 
 import (
 	"io"
-	"jungle/plugins/blueprint"
 	"net/http"
 	"reflect"
 	"strings"
+
+	"github.com/caimmy/jungle/plugins/blueprint"
 )
 
 type JungleHttpServerHandler struct {

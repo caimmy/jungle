@@ -2,13 +2,14 @@ package jungle
 
 import (
 	"fmt"
-	"jungle/html"
-	"jungle/plugins/logger"
-	"jungle/plugins/session"
 	"net/http"
 	"os"
 	"os/signal"
 	"reflect"
+
+	"github.com/caimmy/jungle/html"
+	"github.com/caimmy/jungle/plugins/logger"
+	"github.com/caimmy/jungle/plugins/session"
 )
 
 var (

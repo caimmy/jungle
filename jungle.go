@@ -1,10 +1,10 @@
 package jungle
 
 import (
-	"jungle/html"
-	"jungle/plugins/blueprint"
-	"jungle/plugins/logger"
-	"jungle/plugins/session"
+	"github.com/caimmy/jungle/html"
+	"github.com/caimmy/jungle/plugins/blueprint"
+	"github.com/caimmy/jungle/plugins/logger"
+	"github.com/caimmy/jungle/plugins/session"
 )
 
 // Config params for Top Application

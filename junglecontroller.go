@@ -23,11 +23,12 @@ import (
 	"html"
 	"html/template"
 	"io"
-	"jungle/context"
-	"jungle/web"
 	"net/http"
 	"os"
 	"strings"
+
+	"github.com/caimmy/jungle/context"
+	"github.com/caimmy/jungle/web"
 )
 
 type ControllerInterface interface {
