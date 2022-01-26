@@ -18,27 +18,27 @@
 package session
 
 import (
-	"sync"
-	"strings"
-	"errors"
-	"github.com/caimmy/jungle/context"
-	"io"
 	"crypto/rand"
 	"encoding/base64"
+	"errors"
+	"io"
+	"jungle/context"
+	"strings"
+	"sync"
 	"time"
 )
 
 const (
-	FILE_SESSION 		= "file"
-	REDIS_SESSION		= "redis"
+	FILE_SESSION  = "file"
+	REDIS_SESSION = "redis"
 )
 
 var (
-	SESS_ID				string
+	SESS_ID string
 )
 
 func init() {
-	SESS_ID 			= "jungleid"
+	SESS_ID = "jungleid"
 }
 
 type SessionMgrInterface interface {
@@ -46,22 +46,22 @@ type SessionMgrInterface interface {
 	CloseSession(ctx *context.Context)
 	SetSession(ctx *context.Context, session Session)
 	Set(ctx *context.Context, key string, value interface{})
-	GetSession(ctx *context.Context, ) (Session, error)
+	GetSession(ctx *context.Context) (Session, error)
 	Get(ctx *context.Context, key string) interface{}
 	UpdateSession(ctx *context.Context)
 	GC()
 }
 
 type Session struct {
-	SessID				string						`json:"sessid"`
-	LastTimeAccessed	int64						`json:"lsttm"`
-	Values 				map[string] interface{}		`json:"values"`
+	SessID           string                 `json:"sessid"`
+	LastTimeAccessed int64                  `json:"lsttm"`
+	Values           map[string]interface{} `json:"values"`
 }
 
 type SessionManager struct {
-	m_strCookieName			string
-	m_iMaxlife				int64
-	mLock					sync.RWMutex
+	m_strCookieName string
+	m_iMaxlife      int64
+	mLock           sync.RWMutex
 }
 
 func (this *SessionManager) LoadCookieValue(ctx *context.Context) string {
@@ -90,7 +90,7 @@ func (this *SessionManager) Set(ctx *context.Context, key string, value interfac
 	panic("tobe implements.")
 }
 
-func (this *SessionManager) GetSession(ctx *context.Context, ) (Session, error) {
+func (this *SessionManager) GetSession(ctx *context.Context) (Session, error) {
 	panic("tobe implements.")
 }
 
@@ -114,7 +114,7 @@ func (this *SessionManager) NewSessionID() (string, error) {
 	return base64.URLEncoding.EncodeToString(b), nil
 }
 
-func NewSessionManager(sess_type string, iMaxlife int64, ext_params map[string] interface{}) SessionMgrInterface  {
+func NewSessionManager(sess_type string, iMaxlife int64, ext_params map[string]interface{}) SessionMgrInterface {
 	var ret_session_manager SessionMgrInterface
 	switch strings.ToLower(sess_type) {
 	case REDIS_SESSION:
@@ -130,6 +130,6 @@ func NewSessionManager(sess_type string, iMaxlife int64, ext_params map[string] 
 	return ret_session_manager
 }
 
-func NewSessionObject() *Session  {
-	return &Session{SESS_ID, time.Now().Unix(), make(map[string] interface{})}
+func NewSessionObject() *Session {
+	return &Session{SESS_ID, time.Now().Unix(), make(map[string]interface{})}
 }

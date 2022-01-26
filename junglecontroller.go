@@ -18,16 +18,16 @@
 package jungle
 
 import (
-	"net/http"
+	"bytes"
+	"errors"
 	"html"
 	"html/template"
-	"strings"
 	"io"
+	"jungle/context"
+	"jungle/web"
+	"net/http"
 	"os"
-	"bytes"
-	"github.com/caimmy/jungle/context"
-	"github.com/caimmy/jungle/web"
-	"errors"
+	"strings"
 )
 
 type ControllerInterface interface {
@@ -44,24 +44,24 @@ type ControllerInterface interface {
 }
 
 type JungleController struct {
-	Ctx 			context.Context
+	Ctx context.Context
 
 	// Templates setting
-	TplPath		 	string
-	Layout 			string
-	cache_layout 	template.Template
+	TplPath      string
+	Layout       string
+	cache_layout template.Template
 
 	// Runtime Instances
-	instance_prt	*ControllerInterface
+	instance_prt *ControllerInterface
 }
 
 // intialize controller instance.
 // cptr params ControllerInterface : receive a instance to pointer the final Implements of JungleController
 func (c *JungleController) Init(cptr *ControllerInterface, w http.ResponseWriter, r *http.Request) {
-	c.Ctx.ResponseWriter	= w
-	c.Ctx.Request 			= r
+	c.Ctx.ResponseWriter = w
+	c.Ctx.Request = r
 
-	c.instance_prt  		= cptr
+	c.instance_prt = cptr
 	(*c.instance_prt).Prepare()
 }
 
@@ -102,7 +102,7 @@ func (c *JungleController) Delete() {
 	c.ResponseError("Method not Allowed", http.StatusMethodNotAllowed)
 }
 
-func (c* JungleController) Action() {
+func (c *JungleController) Action() {
 	(*c.instance_prt).BeforeAction()
 	switch strings.ToUpper(c.Ctx.Request.Method) {
 	case METHOD_GET:
@@ -132,17 +132,17 @@ func (c *JungleController) ResponseError(err_msg string, err_code int) {
 	http.Error(c.Ctx.ResponseWriter, err_msg, err_code)
 }
 
-func (c *JungleController) Render(tplfile string, tpl_params map[string] interface{}) {
+func (c *JungleController) Render(tplfile string, tpl_params map[string]interface{}) {
 	// cached and prehot template in TplManager
 	content_str := bytes.NewBufferString("")
-	JungleApp.TemplateManager.RenderHtml(content_str, TemplatesPath + string(os.PathSeparator) + tplfile, tpl_params)
+	JungleApp.TemplateManager.RenderHtml(content_str, TemplatesPath+string(os.PathSeparator)+tplfile, tpl_params)
 	layout_template := JungleApp.TemplateManager.LoadLayout(TemplatesPath + string(os.PathSeparator) + "/layout/layout.phtml")
 	layout_template.Execute(c.Ctx.ResponseWriter, template.HTML(content_str.String()))
 }
 
-func (c *JungleController) RenderPartial(tplfile string, tpl_params map[string] interface{})  {
+func (c *JungleController) RenderPartial(tplfile string, tpl_params map[string]interface{}) {
 	// cached and prehot template in TplManager
-	JungleApp.TemplateManager.RenderHtml(c.Ctx.ResponseWriter, TemplatesPath + string(os.PathSeparator) + tplfile, tpl_params)
+	JungleApp.TemplateManager.RenderHtml(c.Ctx.ResponseWriter, TemplatesPath+string(os.PathSeparator)+tplfile, tpl_params)
 }
 
 func (c *JungleController) Echo(content string, asHtml bool) {
@@ -154,7 +154,7 @@ func (c *JungleController) Echo(content string, asHtml bool) {
 
 func (c *JungleController) SetLayout(layout string) {
 	c.Layout = layout
-	if (c.Layout != "") {
+	if c.Layout != "" {
 		_t_layout, err := template.ParseFiles(c.Layout)
 		if err != nil {
 			panic("layout template not found")
@@ -167,7 +167,7 @@ func (c *JungleController) SetLayout(layout string) {
 func (c *JungleController) GetInstancesByName(filename string) (*web.UploadFile, error) {
 	file, handler, err := c.Ctx.Request.FormFile(filename)
 	if err == nil {
-		return &web.UploadFile{FileHeader:handler, File:file}, nil
+		return &web.UploadFile{FileHeader: handler, File: file}, nil
 	} else {
 		return nil, errors.New("not find file")
 	}
