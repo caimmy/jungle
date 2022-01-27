@@ -15,6 +15,6 @@
 // date     : 2017/12/1 16:10
 // author   : caimmy@hotmail.com
 
-package jungle
+package web
 
 const TEMPLATES_LAYOUT_DEFAULT  = "templates/layout.phtml"

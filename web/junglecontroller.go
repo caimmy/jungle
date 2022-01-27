@@ -15,7 +15,7 @@
 // date     : 2017/11/22 14:27
 // author   : caimmy@hotmail.com
 
-package jungle
+package web
 
 import (
 	"bytes"
@@ -28,7 +28,6 @@ import (
 	"strings"
 
 	"github.com/caimmy/jungle/context"
-	"github.com/caimmy/jungle/web"
 )
 
 type ControllerInterface interface {
@@ -165,10 +164,10 @@ func (c *JungleController) SetLayout(layout string) {
 	}
 }
 
-func (c *JungleController) GetInstancesByName(filename string) (*web.UploadFile, error) {
+func (c *JungleController) GetInstancesByName(filename string) (*UploadFile, error) {
 	file, handler, err := c.Ctx.Request.FormFile(filename)
 	if err == nil {
-		return &web.UploadFile{FileHeader: handler, File: file}, nil
+		return &UploadFile{FileHeader: handler, File: file}, nil
 	} else {
 		return nil, errors.New("not find file")
 	}

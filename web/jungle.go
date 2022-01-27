@@ -1,6 +1,10 @@
-package jungle
+package web
 
 import (
+	"fmt"
+	"os"
+	"strings"
+
 	"github.com/caimmy/jungle/html"
 	"github.com/caimmy/jungle/plugins/blueprint"
 	"github.com/caimmy/jungle/plugins/logger"
@@ -30,15 +34,20 @@ func init() {
 	SessionOn = false
 }
 
-func Run(listen_server string) {
-	JungleApp = NewJungleApp()
+func Run(listen_server string, log_path string) {
+	JungleApp = NewJungleApp(log_path)
 	JungleApp.Run(listen_server)
 }
 
-func NewJungleApp() *JungleRootApplication {
+func NewJungleApp(log_path string) *JungleRootApplication {
+	if log_path == "" {
+		_app_path, _ := os.Getwd()
+		log_path = strings.Join([]string{_app_path, "logs"}, fmt.Sprintf("%c", os.PathSeparator))
+	}
+	fmt.Println(log_path)
 	app := &JungleRootApplication{
 		TemplateManager: html.NewTemplatesManager(),
-		LoggerManager:   logger.NewLoggingManager(LogPath),
+		LoggerManager:   logger.NewLoggingManager(log_path),
 		//SessionManager: session.NewSessionManager(session.FILE_SESSION, SessDuration, map[string]interface{}{"path": SessionPath}),
 	}
 

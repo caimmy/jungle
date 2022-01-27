@@ -18,19 +18,22 @@
 package web
 
 import (
+	"io"
 	"mime/multipart"
 	"os"
-	"io"
 )
 
 type UploadFile struct {
-	FileHeader 				*multipart.FileHeader
-	File 					multipart.File
+	FileHeader *multipart.FileHeader
+	File       multipart.File
 }
 
-func (uf *UploadFile) SaveAs(descpath string) error{
-	f, err := os.OpenFile(descpath, os.O_CREATE | os.O_WRONLY, 0666)
-	defer f.Close()
+func (uf *UploadFile) SaveAs(descpath string) error {
+	f, err := os.OpenFile(descpath, os.O_CREATE|os.O_WRONLY, 0666)
+	if err == nil {
+		defer f.Close()
+	}
+
 	if err == nil {
 		_, cperr := io.Copy(f, uf.File)
 		return cperr
@@ -55,7 +58,7 @@ func (uf *UploadFile) GetContentType() string {
 /**
 check uploadfile is specialize content-type or not
 @return bool
- */
+*/
 func (uf *UploadFile) HasContentType(content_type string) bool {
 	ret_existed_check := false
 	type_collection, ok := uf.FileHeader.Header["Content-Type"]

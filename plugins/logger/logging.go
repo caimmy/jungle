@@ -18,16 +18,16 @@
 package logger
 
 import (
-	"log"
 	"fmt"
+	"log"
 	"os"
-	"time"
 	"sync"
+	"time"
 )
 
-func NewLoggingManager (logPath string) *LoggingManager {
+func NewLoggingManager(logPath string) *LoggingManager {
 	logging_instance := &LoggingManager{
-		LoggingPath: logPath,
+		LoggingPath:   logPath,
 		LoggingCached: make([]interface{}, 0, 1000),
 	}
 	logging_instance.StartRecord()
@@ -35,16 +35,16 @@ func NewLoggingManager (logPath string) *LoggingManager {
 }
 
 type LoggingManager struct {
-	LoggingPath 			string
-	LoggingSize				int
-	LoggingTailLabel		string
-	LoggingCached 			[]interface{}
+	LoggingPath      string
+	LoggingSize      int
+	LoggingTailLabel string
+	LoggingCached    []interface{}
 
-	logger_file_prt 		*os.File
-	logger_file_day 		time.Time
-	dump_log_ticker			*time.Ticker
+	logger_file_prt *os.File
+	logger_file_day time.Time
+	dump_log_ticker *time.Ticker
 
-	rotateMutex				sync.Mutex
+	rotateMutex sync.Mutex
 
 	log.Logger
 }
@@ -81,12 +81,12 @@ func (this *LoggingManager) CreateLogger() {
 	fmt.Println("create logger")
 	this.logger_file_day = time.Now()
 	var err error
-	this.logger_file_prt, err = os.OpenFile(this.LoggingPath + "/" + this.logger_file_day.Format("2006_01_02") + ".log",
-		os.O_RDWR | os.O_CREATE, 0666)
+	this.logger_file_prt, err = os.OpenFile(this.LoggingPath+"/"+this.logger_file_day.Format("2006_01_02")+".log",
+		os.O_RDWR|os.O_CREATE, 0666)
 	if err != nil {
 		panic(err)
 	}
-	this.Logger = *log.New(this.logger_file_prt, "", log.Ldate | log.Ltime | log.Llongfile)
+	this.Logger = *log.New(this.logger_file_prt, "", log.Ldate|log.Ltime|log.Llongfile)
 }
 
 func (this *LoggingManager) Rotation() {
@@ -103,8 +103,7 @@ func (this *LoggingManager) Rotation() {
 func (this *LoggingManager) SchedualLogit() {
 	this.dump_log_ticker = time.NewTicker(time.Second * 5)
 
-	for _ = range this.dump_log_ticker.C{
+	for _ = range this.dump_log_ticker.C {
 		this.Dumplogs()
 	}
 }
-
