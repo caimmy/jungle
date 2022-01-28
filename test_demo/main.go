@@ -18,29 +18,30 @@
 package main
 
 import (
-	"github.com/caimmy/jungle"
 	"fmt"
+
+	"github.com/caimmy/jungle/web"
 )
 
 type CaimmyController struct {
-	jungle.JungleController
+	web.JungleController
 }
 
-func (c *CaimmyController)Get() {
-	param := make(map[string] interface{})
+func (c *CaimmyController) Get() {
+	param := make(map[string]interface{})
 	param["name"] = "caimmy"
 	param["days"] = 10
 	c.Render("test.phtml", param)
 }
 
-func (c *CaimmyController)Post()  {
-	param := make(map[string] interface{})
+func (c *CaimmyController) Post() {
+	param := make(map[string]interface{})
 	param["name"] = "alsdfj撒旦浪费就"
 	param["days"] = 90
 	c.RenderPartial("test.phtml", param)
 }
 
-func (c *CaimmyController)Prepare() {
+func (c *CaimmyController) Prepare() {
 	c.JungleController.Prepare()
 	fmt.Println("caimmycontroller's prepare function called")
 }
@@ -53,16 +54,16 @@ func (c *CaimmyController)Post(w jungle.JungleResponseWriter, r *jungle.JungleRe
 
 func main() {
 	caimmyController := CaimmyController{}
-	jungle.Router("/", &caimmyController)
-	jungle.TemplatesPath = "templates"
-	jungle.Run()
+	web.Router("/", &caimmyController)
+	web.TemplatesPath = "templates"
+	web.Run(":8082", "")
 	/*
-	m := reflect.TypeOf(CaimmyController{})
-	p := reflect.New(m)
-	f := p.MethodByName("Prepare")
-	fmt.Printf("a : %v\n", f)
-	params := make([]reflect.Value, 0)
-	f.Call(params)
-	fmt.Println("asdfasdf")
+		m := reflect.TypeOf(CaimmyController{})
+		p := reflect.New(m)
+		f := p.MethodByName("Prepare")
+		fmt.Printf("a : %v\n", f)
+		params := make([]reflect.Value, 0)
+		f.Call(params)
+		fmt.Println("asdfasdf")
 	*/
 }

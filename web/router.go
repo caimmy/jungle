@@ -15,7 +15,7 @@
 // date     : 2017/11/24 13:53
 // author   : caimmy@hotmail.com
 
-package jungle
+package web
 
 import (
 	"io"
@@ -63,7 +63,7 @@ func (hander *JungleHttpServerHandler) Add(pattern string, c ControllerInterface
 }
 
 func (hander *JungleHttpServerHandler) AddBlueprint(prefix string, bp *blueprint.Blueprint) {
-	if 0 != strings.Index(prefix, "/") {
+	if strings.Index(prefix, "/") != 0{
 		prefix = "/" + prefix
 	}
 	for r, v := range *bp.GetRouter() {

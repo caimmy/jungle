@@ -15,7 +15,7 @@
 // date     : 2017/11/26 10:19
 // author   : caimmy@hotmail.com
 
-package jungle
+package web
 
 import (
 	"net/http"
